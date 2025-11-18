@@ -1,0 +1,25 @@
+package templates
+
+import "firecrest-go/tutorial"
+
+templ Authors(authors []tutorial.Author) {
+	@Html("Authors List", nil) {
+		<div>
+			for _, author := range authors {
+				<a href="/events/slugId">{ author.Name }</a>
+			}
+		</div>
+	}
+}
+
+templ MetaTags(description, keywords string) {
+	<meta name="description" content={ description }/>
+	<meta name="keywords" content={ keywords }/>
+}
+
+templ ServerError() {
+	@Html("Server Error", nil) {
+		<h1>500 - Internal Server Error</h1>
+		<p>Sorry, something went wrong on our end.</p>
+	}
+}
