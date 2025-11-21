@@ -1,14 +1,22 @@
 package components
 
 type TextFieldStruct struct {
-	Name        string
-	Value       string
-	Label       string
-	Placeholder string
-	Type        string
+	Label    string
+	Name     string
+	HasError bool
+	HelpText string
 }
 
-templ TextField(textField TextFieldStruct) {
+templ TextField(textField TextFieldStruct, attrs templ.Attributes) {
 	<label class="text-field__label" for={ textField.Name }>{ textField.Label }</label>
-	<input class="text-field__input" type={ textField.Type } id={ textField.Name } name={ textField.Name } placeholder={ textField.Placeholder } value={ textField.Value }/>
+	<input
+		class="text-field__input"
+		id={ textField.Name }
+		name={ textField.Name }
+		aria-invalid={ textField.HasError }
+		{ attrs... }
+	/>
+	if textField.HelpText != "" {
+		<p class="text-field__help">{ textField.HelpText }</p>
+	}
 }

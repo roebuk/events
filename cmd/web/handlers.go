@@ -42,11 +42,17 @@ func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 =================
 */
 func (app *application) signInView(w http.ResponseWriter, r *http.Request) {
+	app.render(w, http.StatusOK, auth.SignIn())
+}
 
+func (app *application) signInPost(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, auth.SignIn())
 }
 
 func (app *application) signUpView(w http.ResponseWriter, r *http.Request) {
+	app.render(w, http.StatusOK, auth.SignUp())
+}
 
+func (app *application) signUpPost(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, auth.SignUp())
 }

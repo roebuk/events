@@ -18,12 +18,6 @@ templ Html(title string, meta templ.Component) {
 			<main>
 				@components.Header()
 				<div class="home-container">
-					@components.TextField(components.TextFieldStruct{
-						Name:        "Username",
-						Value:       "john_doe",
-						Label:       "Username",
-						Placeholder: "Enter your username",
-					})
 					{ children... }
 				</div>
 				@components.Footer()

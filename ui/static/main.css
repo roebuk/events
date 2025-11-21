@@ -98,6 +98,25 @@
     border-radius: 4px;
   }
 
+  input:user-invalid {
+    border-color: red;
+    box-shadow: 0 0 0 2px red;
+  }
+
   .text-field__label {
+  }
+
+  .btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px #0c6e11;
+    }
   }
 }

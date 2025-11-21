@@ -1,0 +1,9 @@
+package components
+
+type ButtonStruct struct {
+	Name string
+}
+
+templ Button(button ButtonStruct, attrs templ.Attributes) {
+	<button class="btn" { attrs... }>{ button.Name }</button>
+}

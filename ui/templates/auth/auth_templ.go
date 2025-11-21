@@ -11,7 +11,6 @@ import templruntime "github.com/a-h/templ/runtime"
 import "firecrest-go/ui/templates/components"
 import "firecrest-go/ui/templates"
 
-// or wherever Html is defined
 func SignIn() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -50,26 +49,34 @@ func SignIn() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.TextField(components.TextFieldStruct{
-				Name:        "Username",
-				Value:       "",
-				Label:       "Username",
-				Placeholder: "Enter your username",
-				Type:        "text",
+				Name:  "email",
+				Label: "Email",
+			}, templ.Attributes{
+				"autocomplete": "email",
+				"type":         "text",
+				"value":        "",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.TextField(components.TextFieldStruct{
-				Name:        "Password",
-				Value:       "",
-				Label:       "Password",
-				Placeholder: "Enter your password",
-				Type:        "password",
+				Name:  "password",
+				Label: "Password",
+			}, templ.Attributes{
+				"autocomplete": "current-password",
+				"type":         "password",
+				"value":        "",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<button type=\"submit\">Sign In</button></form>")
+			templ_7745c5c3_Err = components.Button(components.ButtonStruct{
+				Name: "Sign in",
+			}, nil).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -121,34 +128,38 @@ func SignUp() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.TextField(components.TextFieldStruct{
-				Name:        "Username",
-				Value:       "",
-				Label:       "Username",
-				Placeholder: "Choose a username",
+				Name:  "email",
+				Label: "Email",
+			}, templ.Attributes{
+				"autocomplete": "email",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.TextField(components.TextFieldStruct{
-				Name:        "Email",
-				Value:       "",
-				Label:       "Email",
-				Placeholder: "Enter your email address",
+				HasError: true,
+				Name:     "password",
+				Label:    "Password",
+				HelpText: "Your password must be at least 8 characters long.",
+			}, templ.Attributes{
+				"value":        "",
+				"placeholder":  "Create a password",
+				"type":         "password",
+				"autocomplete": "current-password",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.TextField(components.TextFieldStruct{
-				Name:        "Password",
-				Value:       "",
-				Label:       "Password",
-				Placeholder: "Create a password",
-				Type:        "password",
+			templ_7745c5c3_Err = components.Button(components.ButtonStruct{
+				Name: "Sign up",
+			}, templ.Attributes{
+				"type":         "submit",
+				"autocomplete": "current-password",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<button type=\"submit\">Sign Up</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
