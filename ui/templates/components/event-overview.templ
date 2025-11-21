@@ -1,0 +1,18 @@
+package components
+
+type Event struct {
+	Title       string
+	Date        string
+	Description string
+	Location    string
+}
+
+templ EventOverview(event Event) {
+	<div>
+		<h2>{ event.Title }</h2>
+		<p>Date: { event.Date }</p>
+		<p>Description: { event.Description }</p>
+		<p>Location: { event.Location }</p>
+		<a href="/"></a>
+	</div>
+}

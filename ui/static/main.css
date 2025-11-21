@@ -1,0 +1,103 @@
+/* Declare layer order */
+@layer reset, components;
+
+:root {
+  --container-width: 1200px;
+
+  /* Colors */
+  --primary-color: #4caf50;
+  --secondary-color: #333;
+  --background-color: aliceblue;
+  --text-color: #000;
+}
+
+@layer reset {
+  *,
+  *::after,
+  *::before {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  :where(html) {
+    color-scheme: light dark;
+    hanging-punctuation: first allow-end last;
+    interpolate-size: allow-keywords;
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+    text-size-adjust: none;
+    -webkit-text-size-adjust: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    color: var(--text-color);
+  }
+
+  :where(body) {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol";
+
+    min-block-size: 100svb;
+    min-inline-size: 300px;
+  }
+
+  :where(canvas, img, picture, svg, video) {
+    block-size: auto;
+    border: none;
+    display: block;
+    max-inline-size: 100%;
+  }
+
+  :where(button, input, progress, select, textarea) {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font: inherit;
+    hanging-punctuation: none;
+    line-height: inherit;
+    text-align: start;
+    touch-action: manipulation;
+  }
+}
+
+/* HOME PAGE */
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+@layer components {
+  body {
+    background-color: aliceblue;
+  }
+
+  header {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+  }
+
+  footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+  }
+
+  input {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .text-field__label {
+  }
+}

@@ -1,17 +1,33 @@
 package templates
 
+import "firecrest-go/ui/templates/components"
+
 templ Html(title string, meta templ.Component) {
 	<html lang="en-GB">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="stylesheet" href="/static/main.css"/>
+			<link rel="icon" type="image/png" href="/static/img/favicon.png"/>
 			<title>{ title }</title>
 			if meta != nil {
 				@meta
 			}
 		</head>
 		<body>
-			{ children... }
+			<main>
+				@components.Header()
+				<div class="home-container">
+					@components.TextField(components.TextFieldStruct{
+						Name:        "Username",
+						Value:       "john_doe",
+						Label:       "Username",
+						Placeholder: "Enter your username",
+					})
+					{ children... }
+				</div>
+				@components.Footer()
+			</main>
 		</body>
 	</html>
 }

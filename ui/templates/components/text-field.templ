@@ -1,0 +1,14 @@
+package components
+
+type TextFieldStruct struct {
+	Name        string
+	Value       string
+	Label       string
+	Placeholder string
+	Type        string
+}
+
+templ TextField(textField TextFieldStruct) {
+	<label class="text-field__label" for={ textField.Name }>{ textField.Label }</label>
+	<input class="text-field__input" type={ textField.Type } id={ textField.Name } name={ textField.Name } placeholder={ textField.Placeholder } value={ textField.Value }/>
+}

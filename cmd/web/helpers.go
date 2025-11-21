@@ -41,9 +41,8 @@ func (app *application) serverError(w http.ResponseWriter, r *http.Request, err 
 	`))
 }
 
-func (app *application) render(w http.ResponseWriter, r *http.Request, status int, component templ.Component) {
+func (app *application) render(w http.ResponseWriter, status int, component templ.Component) {
 	w.WriteHeader(status)
-	w.Header().Add("Content-Type", "text/html")
 
 	component.Render(context.Background(), w)
 }

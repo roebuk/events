@@ -1,0 +1,56 @@
+package auth
+
+import "firecrest-go/ui/templates/components"
+import "firecrest-go/ui/templates"
+
+// or wherever Html is defined
+templ SignIn() {
+	@templates.Html("Sign In", nil) {
+		<h1>Sign In</h1>
+		<form method="POST" action="/auth/sign-in">
+			@components.TextField(components.TextFieldStruct{
+				Name:        "Username",
+				Value:       "",
+				Label:       "Username",
+				Placeholder: "Enter your username",
+				Type:        "text",
+			})
+			@components.TextField(components.TextFieldStruct{
+				Name:        "Password",
+				Value:       "",
+				Label:       "Password",
+				Placeholder: "Enter your password",
+				Type:        "password",
+			})
+			<button type="submit">Sign In</button>
+		</form>
+	}
+}
+
+templ SignUp() {
+	@templates.Html("Sign Up", nil) {
+		<h1>Sign Up</h1>
+		<form method="POST" action="/auth/sign-up">
+			@components.TextField(components.TextFieldStruct{
+				Name:        "Username",
+				Value:       "",
+				Label:       "Username",
+				Placeholder: "Choose a username",
+			})
+			@components.TextField(components.TextFieldStruct{
+				Name:        "Email",
+				Value:       "",
+				Label:       "Email",
+				Placeholder: "Enter your email address",
+			})
+			@components.TextField(components.TextFieldStruct{
+				Name:        "Password",
+				Value:       "",
+				Label:       "Password",
+				Placeholder: "Create a password",
+				Type:        "password",
+			})
+			<button type="submit">Sign Up</button>
+		</form>
+	}
+}
