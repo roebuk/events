@@ -1,23 +1,22 @@
 package templates
 
 import "firecrest-go/tutorial"
-import "strconv"
 
-templ Home(authors []tutorial.Author) {
+templ Home(events []tutorial.Event) {
 	@Html("Home", nil) {
 		<h1>Welcome to the Home Page</h1>
 		<div>
-			for _, author := range authors {
-				<a href={ templ.URL("/events/" + strconv.Itoa(int(author.ID))) }>{ author.Name }</a>
+			for _, event := range events {
+				<a href={ templ.URL("/events/" + event.Slug) }>{ event.Name }</a>
 			}
 		</div>
 	}
 }
 
-templ Event(author tutorial.Author) {
+templ Event(author tutorial.Event) {
 	@Html("Event Details", nil) {
 		<h1>{ author.Name }</h1>
-		<h1>{ author.Bio.String }</h1>
+		<h1>{ author.Slug }</h1>
 	}
 }
 

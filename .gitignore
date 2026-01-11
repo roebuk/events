@@ -9,6 +9,9 @@ coverage.html
 # Dependency directories
 vendor/
 
+# Temp folder
+tmp
+
 # Go workspace file
 go.work
 

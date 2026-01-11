@@ -3,6 +3,8 @@ sql:
   - engine: "postgresql"
     queries: "query.sql"
     schema: "schema.sql"
+    strict_function_checks: true
+    strict_order_by: true
     gen:
       go:
         package: "tutorial"

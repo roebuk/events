@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
@@ -11,16 +13,22 @@ func (app *application) routes() http.Handler {
 
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("GET /events/{slug}", app.eventView)
+	dynamic := alice.New()
+
+	mux.Handle("/", dynamic.ThenFunc(app.home))
+	mux.Handle("GET /events/{slug}", dynamic.ThenFunc(app.eventView))
 
 	// Authentication routes
-	mux.HandleFunc("GET /auth/sign-in", app.signInView)
-	mux.HandleFunc("POST /auth/sign-in", app.signInPost)
-	mux.HandleFunc("GET /auth/sign-up", app.signUpView)
-	mux.HandleFunc("POST /auth/sign-up", app.signUpPost)
+	mux.Handle("GET /auth/sign-in", dynamic.ThenFunc(app.signInView))
+	mux.Handle("POST /auth/sign-in", dynamic.ThenFunc(app.signInPost))
+	mux.Handle("GET /auth/sign-up", dynamic.ThenFunc(app.signUpView))
+	mux.Handle("POST /auth/sign-up", dynamic.ThenFunc(app.signUpPost))
 
+	mux.HandleFunc("GET /insert", app.adminCreatePost)
+	mux.HandleFunc("GET /insert-user", app.adminCreateUser)
+	// mux.Handle("GET /admin/create", app. )
 	// mux.HandleFunc("GET /privacy", app.privacyView)
+	standard := alice.New(app.logRequest, commonHeaders)
 
-	return mux
+	return standard.Then(mux)
 }

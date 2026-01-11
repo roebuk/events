@@ -5,11 +5,218 @@
 package tutorial
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Author struct {
-	ID   int64
-	Name string
-	Bio  pgtype.Text
+type AuditAction string
+
+const (
+	AuditActionCreated AuditAction = "created"
+	AuditActionUpdated AuditAction = "updated"
+	AuditActionDeleted AuditAction = "deleted"
+)
+
+func (e *AuditAction) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuditAction(s)
+	case string:
+		*e = AuditAction(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuditAction: %T", src)
+	}
+	return nil
+}
+
+type NullAuditAction struct {
+	AuditAction AuditAction
+	Valid       bool // Valid is true if AuditAction is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuditAction) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuditAction, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuditAction.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuditAction) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuditAction), nil
+}
+
+type AuthProvider string
+
+const (
+	AuthProviderGoogle AuthProvider = "google"
+	AuthProviderApple  AuthProvider = "apple"
+)
+
+func (e *AuthProvider) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthProvider(s)
+	case string:
+		*e = AuthProvider(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthProvider: %T", src)
+	}
+	return nil
+}
+
+type NullAuthProvider struct {
+	AuthProvider AuthProvider
+	Valid        bool // Valid is true if AuthProvider is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthProvider) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthProvider, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthProvider.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthProvider) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthProvider), nil
+}
+
+type UserRole string
+
+const (
+	UserRoleEntrant   UserRole = "entrant"
+	UserRoleOrganizer UserRole = "organizer"
+	UserRoleAdmin     UserRole = "admin"
+)
+
+func (e *UserRole) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserRole(s)
+	case string:
+		*e = UserRole(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserRole: %T", src)
+	}
+	return nil
+}
+
+type NullUserRole struct {
+	UserRole UserRole
+	Valid    bool // Valid is true if UserRole is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserRole) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserRole, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserRole.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserRole) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserRole), nil
+}
+
+type AuthCredential struct {
+	ID                  int64
+	UserID              int64
+	PasswordHash        string
+	EmailVerifiedAt     pgtype.Timestamptz
+	LastLoginAt         pgtype.Timestamptz
+	FailedLoginAttempts int32
+	LockedUntil         pgtype.Timestamptz
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	DeletedAt           pgtype.Timestamptz
+}
+
+type Event struct {
+	ID             int64
+	OrganisationID int64
+	Name           string
+	Slug           string
+	CreatedAt      pgtype.Timestamptz
+	UpdatedAt      pgtype.Timestamptz
+	DeletedAt      pgtype.Timestamptz
+}
+
+type Organisation struct {
+	ID        int64
+	Name      string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	DeletedAt pgtype.Timestamptz
+}
+
+type OrganisationUser struct {
+	ID             int64
+	OrganisationID int64
+	UserID         int64
+	CreatedAt      pgtype.Timestamptz
+	DeletedAt      pgtype.Timestamptz
+}
+
+type Race struct {
+	ID                    int64
+	EventID               int64
+	Name                  string
+	Slug                  string
+	RegistrationOpenDate  pgtype.Timestamptz
+	RegistrationCloseDate pgtype.Timestamptz
+	MaxCapacity           int32
+	PriceUnits            pgtype.Int4
+	Currency              pgtype.Text
+	CreatedAt             pgtype.Timestamptz
+	UpdatedAt             pgtype.Timestamptz
+	DeletedAt             pgtype.Timestamptz
+}
+
+type SocialAccount struct {
+	ID             int64
+	UserID         int64
+	Provider       AuthProvider
+	ProviderUserID string
+	CreatedAt      pgtype.Timestamptz
+	UpdatedAt      pgtype.Timestamptz
+	DeletedAt      pgtype.Timestamptz
+}
+
+type User struct {
+	ID           int64
+	Email        string
+	FirstName    string
+	LastName     string
+	Phone        pgtype.Text
+	AddressLine1 pgtype.Text
+	AddressLine2 pgtype.Text
+	City         pgtype.Text
+	State        pgtype.Text
+	PostalCode   pgtype.Text
+	Country      pgtype.Text
+	Role         UserRole
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
+	DeletedAt    pgtype.Timestamptz
 }

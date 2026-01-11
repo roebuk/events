@@ -11,61 +11,244 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createAuthor = `-- name: CreateAuthor :one
-INSERT INTO authors (name, bio)
-VALUES ($1, $2)
-RETURNING id, name, bio
+const createEvent = `-- name: CreateEvent :one
+INSERT INTO events (
+  organisation_id,
+  name,
+  slug)
+VALUES ($1, $2, $3)
+RETURNING id, organisation_id, name, slug, created_at, updated_at, deleted_at
 `
 
-type CreateAuthorParams struct {
-	Name string
-	Bio  pgtype.Text
+type CreateEventParams struct {
+	OrganisationID int64
+	Name           string
+	Slug           string
 }
 
-func (q *Queries) CreateAuthor(ctx context.Context, arg CreateAuthorParams) (Author, error) {
-	row := q.db.QueryRow(ctx, createAuthor, arg.Name, arg.Bio)
-	var i Author
-	err := row.Scan(&i.ID, &i.Name, &i.Bio)
+func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
+	row := q.db.QueryRow(ctx, createEvent, arg.OrganisationID, arg.Name, arg.Slug)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.OrganisationID,
+		&i.Name,
+		&i.Slug,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
 	return i, err
 }
 
-const deleteAuthor = `-- name: DeleteAuthor :exec
-DELETE FROM authors
+const createOrganisation = `-- name: CreateOrganisation :one
+INSERT INTO organisations (
+  name)
+VALUES ($1)
+RETURNING id, name, created_at, updated_at, deleted_at
+`
+
+func (q *Queries) CreateOrganisation(ctx context.Context, name string) (Organisation, error) {
+	row := q.db.QueryRow(ctx, createOrganisation, name)
+	var i Organisation
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const createUser = `-- name: CreateUser :one
+INSERT INTO users (
+  email,
+  first_name,
+  last_name,
+  phone,
+  address_line1,
+  address_line2,
+  city,
+  state,
+  postal_code,
+  country,
+  role)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING id, email, first_name, last_name, phone, address_line1, address_line2, city, state, postal_code, country, role, created_at, updated_at, deleted_at
+`
+
+type CreateUserParams struct {
+	Email        string
+	FirstName    string
+	LastName     string
+	Phone        pgtype.Text
+	AddressLine1 pgtype.Text
+	AddressLine2 pgtype.Text
+	City         pgtype.Text
+	State        pgtype.Text
+	PostalCode   pgtype.Text
+	Country      pgtype.Text
+	Role         UserRole
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Email,
+		arg.FirstName,
+		arg.LastName,
+		arg.Phone,
+		arg.AddressLine1,
+		arg.AddressLine2,
+		arg.City,
+		arg.State,
+		arg.PostalCode,
+		arg.Country,
+		arg.Role,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FirstName,
+		&i.LastName,
+		&i.Phone,
+		&i.AddressLine1,
+		&i.AddressLine2,
+		&i.City,
+		&i.State,
+		&i.PostalCode,
+		&i.Country,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const deleteEvent = `-- name: DeleteEvent :exec
+UPDATE events
+SET deleted_at = NOW()
 WHERE id = $1
 `
 
-func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteAuthor, id)
+func (q *Queries) DeleteEvent(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteEvent, id)
 	return err
 }
 
-const getAuthor = `-- name: GetAuthor :one
-SELECT id, name, bio from authors
-WHERE id = $1 LIMIT 1
+const deleteOrganisation = `-- name: DeleteOrganisation :exec
+UPDATE organisations
+SET deleted_at = NOW()
+WHERE id = $1
 `
 
-func (q *Queries) GetAuthor(ctx context.Context, id int64) (Author, error) {
-	row := q.db.QueryRow(ctx, getAuthor, id)
-	var i Author
-	err := row.Scan(&i.ID, &i.Name, &i.Bio)
+func (q *Queries) DeleteOrganisation(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteOrganisation, id)
+	return err
+}
+
+const deleteUser = `-- name: DeleteUser :exec
+UPDATE users
+SET deleted_at = NOW()
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
+}
+
+const getEvent = `-- name: GetEvent :one
+SELECT id, organisation_id, name, slug, created_at, updated_at, deleted_at from events
+WHERE slug = $1 LIMIT 1
+`
+
+func (q *Queries) GetEvent(ctx context.Context, slug string) (Event, error) {
+	row := q.db.QueryRow(ctx, getEvent, slug)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.OrganisationID,
+		&i.Name,
+		&i.Slug,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
 	return i, err
 }
 
-const listAuthors = `-- name: ListAuthors :many
-SELECT id, name, bio from authors
+const getOrganisation = `-- name: GetOrganisation :one
+SELECT id, name, created_at, updated_at, deleted_at from organisations
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetOrganisation(ctx context.Context, id int64) (Organisation, error) {
+	row := q.db.QueryRow(ctx, getOrganisation, id)
+	var i Organisation
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getUser = `-- name: GetUser :one
+SELECT id, email, first_name, last_name, phone, address_line1, address_line2, city, state, postal_code, country, role, created_at, updated_at, deleted_at from users
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRow(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FirstName,
+		&i.LastName,
+		&i.Phone,
+		&i.AddressLine1,
+		&i.AddressLine2,
+		&i.City,
+		&i.State,
+		&i.PostalCode,
+		&i.Country,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const listEvents = `-- name: ListEvents :many
+SELECT id, organisation_id, name, slug, created_at, updated_at, deleted_at from events
 ORDER BY name
 `
 
-func (q *Queries) ListAuthors(ctx context.Context) ([]Author, error) {
-	rows, err := q.db.Query(ctx, listAuthors)
+func (q *Queries) ListEvents(ctx context.Context) ([]Event, error) {
+	rows, err := q.db.Query(ctx, listEvents)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Author
+	var items []Event
 	for rows.Next() {
-		var i Author
-		if err := rows.Scan(&i.ID, &i.Name, &i.Bio); err != nil {
+		var i Event
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrganisationID,
+			&i.Name,
+			&i.Slug,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -76,21 +259,88 @@ func (q *Queries) ListAuthors(ctx context.Context) ([]Author, error) {
 	return items, nil
 }
 
-const updateAuthor = `-- name: UpdateAuthor :exec
-UPDATE authors
+const updateEvent = `-- name: UpdateEvent :exec
+UPDATE events
 SET name = $2,
-    bio = $3
+    slug = $3
 WHERE id = $1
-RETURNING id, name, bio
+RETURNING id, organisation_id, name, slug, created_at, updated_at, deleted_at
 `
 
-type UpdateAuthorParams struct {
+type UpdateEventParams struct {
 	ID   int64
 	Name string
-	Bio  pgtype.Text
+	Slug string
 }
 
-func (q *Queries) UpdateAuthor(ctx context.Context, arg UpdateAuthorParams) error {
-	_, err := q.db.Exec(ctx, updateAuthor, arg.ID, arg.Name, arg.Bio)
+func (q *Queries) UpdateEvent(ctx context.Context, arg UpdateEventParams) error {
+	_, err := q.db.Exec(ctx, updateEvent, arg.ID, arg.Name, arg.Slug)
+	return err
+}
+
+const updateOrganisation = `-- name: UpdateOrganisation :exec
+UPDATE organisations
+SET name = $2
+WHERE id = $1
+RETURNING id, name, created_at, updated_at, deleted_at
+`
+
+type UpdateOrganisationParams struct {
+	ID   int64
+	Name string
+}
+
+func (q *Queries) UpdateOrganisation(ctx context.Context, arg UpdateOrganisationParams) error {
+	_, err := q.db.Exec(ctx, updateOrganisation, arg.ID, arg.Name)
+	return err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+SET email = $2,
+    first_name = $3,
+    last_name = $4,
+    phone = $5,
+    address_line1 = $6,
+    address_line2 = $7,
+    city = $8,
+    state = $9,
+    postal_code = $10,
+    country = $11,
+    role = $12
+WHERE id = $1
+RETURNING id, email, first_name, last_name, phone, address_line1, address_line2, city, state, postal_code, country, role, created_at, updated_at, deleted_at
+`
+
+type UpdateUserParams struct {
+	ID           int64
+	Email        string
+	FirstName    string
+	LastName     string
+	Phone        pgtype.Text
+	AddressLine1 pgtype.Text
+	AddressLine2 pgtype.Text
+	City         pgtype.Text
+	State        pgtype.Text
+	PostalCode   pgtype.Text
+	Country      pgtype.Text
+	Role         UserRole
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.Exec(ctx, updateUser,
+		arg.ID,
+		arg.Email,
+		arg.FirstName,
+		arg.LastName,
+		arg.Phone,
+		arg.AddressLine1,
+		arg.AddressLine2,
+		arg.City,
+		arg.State,
+		arg.PostalCode,
+		arg.Country,
+		arg.Role,
+	)
 	return err
 }

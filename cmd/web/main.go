@@ -4,7 +4,6 @@ import (
 	"context"
 	"firecrest-go/tutorial"
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -37,17 +36,6 @@ func main() {
 		db:     queries,
 	}
 
-	authors, err := queries.ListAuthors(context.Background())
-	if err != nil {
-		logger.Error(err.Error())
-	}
-
-	log.Println(authors)
-
-	for _, author := range authors {
-		fmt.Printf("Author: %d, %s, %s\n", author.ID, author.Name, author.Bio.String)
-	}
-
 	srv := &http.Server{
 		Addr:           ":8080",
 		Handler:        app.routes(),
@@ -59,7 +47,7 @@ func main() {
 	}
 
 	fmt.Println("🚀 Running server on :8080")
-	err = srv.ListenAndServe()
+	err := srv.ListenAndServe()
 
 	fmt.Fprintf(os.Stderr, "Server error: %v\n", err)
 	os.Exit(1)
