@@ -14,7 +14,7 @@ import (
 
 type application struct {
 	logger *slog.Logger
-	db     *db.Queries
+	db     DB
 }
 
 func main() {
