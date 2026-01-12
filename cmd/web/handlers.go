@@ -1,16 +1,17 @@
 package main
 
 import (
-	"context"
 	"errors"
-	"firecrest-go/tutorial"
+	"firecrest-go/db"
 	"firecrest-go/ui/templates"
 	"firecrest-go/ui/templates/auth"
 	"net/http"
+
+	"github.com/jackc/pgx/v5"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	events, err := app.db.ListEvents(context.Background())
+	events, err := app.db.ListEvents(r.Context())
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -23,12 +24,16 @@ func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 
 	if len(slug) == 0 || len(slug) > 100 {
-		app.serverError(w, r, errors.New("invalid event slug"))
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	event, err := app.db.GetEvent(context.Background(), slug)
+	event, err := app.db.GetEvent(r.Context(), slug)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			app.notFound(w)
+			return
+		}
 		app.serverError(w, r, err)
 		return
 	}
@@ -61,7 +66,7 @@ func (app *application) adminCreateView(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) {
-	event, err := app.db.CreateEvent(context.Background(), tutorial.CreateEventParams{
+	event, err := app.db.CreateEvent(r.Context(), db.CreateEventParams{
 		OrganisationID: 1,
 		Name:           "Lincoln 10k",
 		Slug:           "lincoln-10k",
@@ -88,7 +93,7 @@ func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) 
 // }
 
 func (app *application) adminCreateUser(w http.ResponseWriter, r *http.Request) {
-	_, err := app.db.CreateUser(context.Background(), tutorial.CreateUserParams{
+	_, err := app.db.CreateUser(r.Context(), db.CreateUserParams{
 		Email:     "user@example.com",
 		FirstName: "Kristian",
 		LastName:  "Roebuck",
@@ -99,5 +104,5 @@ func (app *application) adminCreateUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	app.render(w, http.StatusOK, templates.Home(make([]tutorial.Event, 0)))
+	app.render(w, http.StatusOK, templates.Home(make([]db.Event, 0)))
 }

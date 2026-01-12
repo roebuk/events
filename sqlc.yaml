@@ -7,6 +7,6 @@ sql:
     strict_order_by: true
     gen:
       go:
-        package: "tutorial"
-        out: "tutorial"
+        package: "db"
+        out: "db"
         sql_package: "pgx/v5"

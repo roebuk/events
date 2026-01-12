@@ -1,8 +1,8 @@
 package templates
 
-import "firecrest-go/tutorial"
+import "firecrest-go/db"
 
-templ Home(events []tutorial.Event) {
+templ Home(events []db.Event) {
 	@Html("Home", nil) {
 		<h1>Welcome to the Home Page</h1>
 		<div>
@@ -13,10 +13,10 @@ templ Home(events []tutorial.Event) {
 	}
 }
 
-templ Event(author tutorial.Event) {
+templ Event(event db.Event) {
 	@Html("Event Details", nil) {
-		<h1>{ author.Name }</h1>
-		<h1>{ author.Slug }</h1>
+		<h1>{ event.Name }</h1>
+		<h1>{ event.Slug }</h1>
 	}
 }
 
