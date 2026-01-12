@@ -16,7 +16,6 @@ templ Home(events []db.Event) {
 templ Event(event db.Event) {
 	@Html("Event Details", nil) {
 		<h1>{ event.Name }</h1>
-		<h1>{ event.Slug }</h1>
 	}
 }
 

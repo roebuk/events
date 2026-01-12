@@ -12,9 +12,17 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// dbInterface defines the database operations we need
+type dbInterface interface {
+	ListEvents(ctx context.Context) ([]db.Event, error)
+	GetEvent(ctx context.Context, slug string) (db.Event, error)
+	CreateEvent(ctx context.Context, arg db.CreateEventParams) (db.Event, error)
+	CreateUser(ctx context.Context, arg db.CreateUserParams) (db.User, error)
+}
+
 type application struct {
 	logger *slog.Logger
-	db     *db.Queries
+	db     dbInterface
 }
 
 func main() {
