@@ -15,11 +15,31 @@ import (
 type application struct {
 	logger *slog.Logger
 	db     *db.Queries
+	env    string
 }
 
 func main() {
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))
+	// Get environment mode (defaults to "development" if not set)
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "development"
+	}
+
+	// Configure logger based on environment
+	var logger *slog.Logger
+	if env == "production" {
+		// JSON logging for production
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		}))
+	} else {
+		// Text logging with source for development
+		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			AddSource: true,
+			Level:     slog.LevelDebug,
+		}))
+	}
 	dbpool, dbErr := pgxpool.New(context.Background(), "postgres://postgres:postgres@127.0.0.1:5432/firecrest")
 
 	if dbErr != nil {
@@ -34,7 +54,10 @@ func main() {
 	app := &application{
 		logger: logger,
 		db:     queries,
+		env:    env,
 	}
+
+	logger.Info("starting server", "env", env, "port", "8080")
 
 	srv := &http.Server{
 		Addr:           ":8080",
