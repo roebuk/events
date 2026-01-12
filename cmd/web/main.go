@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"firecrest-go/tutorial"
+	"firecrest-go/db"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -14,7 +14,7 @@ import (
 
 type application struct {
 	logger *slog.Logger
-	db     *tutorial.Queries
+	db     *db.Queries
 }
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 
 	defer dbpool.Close()
 
-	queries := tutorial.New(dbpool)
+	queries := db.New(dbpool)
 
 	app := &application{
 		logger: logger,
