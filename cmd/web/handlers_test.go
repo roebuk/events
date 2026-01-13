@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/jackc/pgx/v5"
@@ -185,11 +186,7 @@ func TestEventView(t *testing.T) {
 	t.Run("returns 400 for slug exceeding 100 characters", func(t *testing.T) {
 		mock := &mockDB{}
 		app := newTestApplication(mock)
-
-		longSlug := make([]byte, 101)
-		for i := range longSlug {
-			longSlug[i] = 'a'
-		}
+		longSlug := strings.Repeat("a", 101)
 
 		req := httptest.NewRequest(http.MethodGet, "/events/"+string(longSlug), nil)
 		req.SetPathValue("slug", string(longSlug))
