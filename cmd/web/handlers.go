@@ -96,6 +96,7 @@ func (app *application) adminCreateUser(w http.ResponseWriter, r *http.Request) 
 		LastName:  "Roebuck",
 		Role:      "admin",
 	})
+
 	if err != nil {
 		app.serverError(w, r, err)
 		return
