@@ -16,7 +16,7 @@ func commonHeaders(next http.Handler) http.Handler {
 		w.Header().Set("X-Frame-Options", "deny")
 		w.Header().Set("X-XSS-Protection", "0")
 		w.Header().Set("Permissions-Policy", "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()")
-		// w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
+		w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
 		w.Header().Set("Cross-Origin-Resource-Policy", "same-origin")
 
@@ -33,7 +33,7 @@ func (app *application) logRequest(next http.Handler) http.Handler {
 			uri    = r.URL.RequestURI()
 		)
 
-		app.logger.Info("request recieved", "ip", ip, "proto", proto, "method", method, "uri", uri)
+		app.logger.Info("request received", "ip", ip, "proto", proto, "method", method, "uri", uri)
 
 		next.ServeHTTP(w, r)
 	})
