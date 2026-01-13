@@ -2,12 +2,13 @@ package main
 
 import (
 	"errors"
-	"firecrest-go/db"
-	"firecrest-go/ui/templates"
-	"firecrest-go/ui/templates/auth"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
+
+	"firecrest-go/db"
+	"firecrest-go/ui/templates"
+	"firecrest-go/ui/templates/auth"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -17,13 +18,13 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.render(w, http.StatusOK, templates.Home(events))
+	app.render(r.Context(), w, http.StatusOK, templates.Home(events))
 }
 
 func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 
-	if len(slug) == 0 || len(slug) > 100 {
+	if slug == "" || len(slug) > 100 {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
@@ -38,7 +39,7 @@ func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.render(w, http.StatusOK, templates.Event(event))
+	app.render(r.Context(), w, http.StatusOK, templates.Event(event))
 }
 
 /*
@@ -46,23 +47,19 @@ func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 =================
 */
 func (app *application) signInView(w http.ResponseWriter, r *http.Request) {
-	app.render(w, http.StatusOK, auth.SignIn())
+	app.render(r.Context(), w, http.StatusOK, auth.SignIn())
 }
 
 func (app *application) signInPost(w http.ResponseWriter, r *http.Request) {
-	app.render(w, http.StatusOK, auth.SignIn())
+	app.render(r.Context(), w, http.StatusOK, auth.SignIn())
 }
 
 func (app *application) signUpView(w http.ResponseWriter, r *http.Request) {
-	app.render(w, http.StatusOK, auth.SignUp())
+	app.render(r.Context(), w, http.StatusOK, auth.SignUp())
 }
 
 func (app *application) signUpPost(w http.ResponseWriter, r *http.Request) {
-	app.render(w, http.StatusOK, auth.SignUp())
-}
-
-func (app *application) adminCreateView(w http.ResponseWriter, r *http.Request) {
-	app.render(w, http.StatusOK, auth.SignIn())
+	app.render(r.Context(), w, http.StatusOK, auth.SignUp())
 }
 
 func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +73,7 @@ func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	app.render(w, http.StatusOK, templates.Event(event))
+	app.render(r.Context(), w, http.StatusOK, templates.Event(event))
 }
 
 // func (app *application) adminCreateOrg(w http.ResponseWriter, r *http.Request) {
@@ -99,10 +96,11 @@ func (app *application) adminCreateUser(w http.ResponseWriter, r *http.Request) 
 		LastName:  "Roebuck",
 		Role:      "admin",
 	})
+
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	app.render(w, http.StatusOK, templates.Home(make([]db.Event, 0)))
+	app.render(r.Context(), w, http.StatusOK, templates.Home(make([]db.Event, 0)))
 }
