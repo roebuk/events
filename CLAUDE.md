@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is **firecrest-go**, a Go-based event management web application. The system handles organizations, events, races, and user registrations with authentication support.
+This is **firecrest**, a Go-based event management web application. The system handles organizations, events, races, and user registrations with authentication support.
 
 ## Technology Stack
 

@@ -61,7 +61,7 @@ linters-settings:
       - hugeParam  # Can be noisy for structs passed by value intentionally
 
   goimports:
-    local-prefixes: firecrest-go
+    local-prefixes: firecrest
 
   gosec:
     excludes:

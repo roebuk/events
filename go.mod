@@ -1,4 +1,4 @@
-module firecrest-go
+module firecrest
 
 go 1.25.4
 
