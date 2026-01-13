@@ -6,7 +6,7 @@ This is **firecrest**, a Go-based event management web application. The system h
 
 ## Technology Stack
 
-- **Language**: Go 1.25.4
+- **Language**: Go 1.24
 - **Web Framework**: Native `net/http` with middleware via `justinas/alice`
 - **Database**: PostgreSQL (via `pgx/v5` driver and connection pooling)
 - **Templating**: `templ` (type-safe Go templating)
