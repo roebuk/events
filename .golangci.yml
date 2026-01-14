@@ -1,147 +1,137 @@
-# golangci-lint configuration
-# Run with: golangci-lint run ./...
-
+version: "2"
 run:
-  timeout: 5m
   modules-download-mode: readonly
-
 linters:
   enable:
-    # Default linters
-    - errcheck       # Check for unchecked errors
-    - gosimple       # Simplify code
-    - govet          # Report suspicious constructs
-    - ineffassign    # Detect ineffectual assignments
-    - staticcheck    # Static analysis checks
-    - unused         # Check for unused code
-
-    # Additional recommended linters
-    - bodyclose      # Check HTTP response body is closed
-    - contextcheck   # Check context.Context usage
-    - durationcheck  # Check for duration multiplications
-    - errname        # Check error naming conventions
-    - errorlint      # Find code that will cause issues with Go 1.13+ error wrapping
-    - exhaustive     # Check exhaustiveness of enum switch statements
-    - copyloopvar    # Detect loop variable copy issues
-    - gochecknoinits # Check for init functions
-    - goconst        # Find repeated strings that could be constants
-    - gocritic       # Comprehensive linter with many checks
-    - gofmt          # Check if code is formatted
-    - goimports      # Check imports are formatted and sorted
-    - gosec          # Security-focused linter
-    - misspell       # Check for common misspellings
-    - nilerr         # Find code returning nil with non-nil error
-    - noctx          # Find HTTP requests without context.Context
-    - prealloc       # Find slice declarations that could be preallocated
-    - predeclared    # Find code shadowing predeclared identifiers
-    - revive         # Fast, configurable linter (golint successor)
-    - sqlclosecheck  # Check SQL Rows/Stmt are closed
-    - unconvert      # Remove unnecessary type conversions
-    - unparam        # Find unused function parameters
-    - wastedassign   # Find wasted assignment statements
-
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-    exclude-functions:
-      - io.Copy
-      - (io.Closer).Close
-
-  goconst:
-    min-len: 3
-    min-occurrences: 3
-
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - style
-      - performance
-    disabled-checks:
-      - hugeParam  # Can be noisy for structs passed by value intentionally
-
-  goimports:
-    local-prefixes: firecrest
-
-  gosec:
-    excludes:
-      - G104  # Audit errors not checked (covered by errcheck)
-
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment  # Too noisy for most projects
-
-  revive:
+    - bodyclose
+    - contextcheck
+    - copyloopvar
+    - durationcheck
+    - errname
+    - errorlint
+    - exhaustive
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gosec
+    - misspell
+    - nilerr
+    - noctx
+    - prealloc
+    - predeclared
+    - revive
+    - sqlclosecheck
+    - unconvert
+    - unparam
+    - wastedassign
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+      exclude-functions:
+        - io.Copy
+        - (io.Closer).Close
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+    gocritic:
+      disabled-checks:
+        - hugeParam
+      enabled-tags:
+        - diagnostic
+        - style
+        - performance
+    gosec:
+      excludes:
+        - G104
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+        - name: if-return
+        - name: increment-decrement
+        - name: var-naming
+        - name: var-declaration
+        - name: package-comments
+          disabled: true
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unexported-return
+        - name: indent-error-flow
+        - name: errorf
+        - name: empty-block
+        - name: superfluous-else
+        - name: unused-parameter
+          disabled: true
+        - name: unreachable-code
+        - name: redefines-builtin-id
+    staticcheck:
+      checks:
+        - all
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      - name: blank-imports
-      - name: context-as-argument
-      - name: context-keys-type
-      - name: dot-imports
-      - name: error-return
-      - name: error-strings
-      - name: error-naming
-      - name: exported
-      - name: if-return
-      - name: increment-decrement
-      - name: var-naming
-      - name: var-declaration
-      - name: package-comments
-        disabled: true  # Can be noisy for small projects
-      - name: range
-      - name: receiver-naming
-      - name: time-naming
-      - name: unexported-return
-      - name: indent-error-flow
-      - name: errorf
-      - name: empty-block
-      - name: superfluous-else
-      - name: unused-parameter
-        disabled: true  # Covered by unparam
-      - name: unreachable-code
-      - name: redefines-builtin-id
-
-  staticcheck:
-    checks:
-      - all
-
+      - linters:
+          - errcheck
+          - gochecknoinits
+          - goconst
+          - gocritic
+          - gosec
+          - revive
+          - unparam
+          - unused
+        path: _templ\.go$
+      - linters:
+          - errcheck
+          - goconst
+          - gocritic
+          - revive
+          - unparam
+        path: \.sql\.go$
+      - linters:
+          - gochecknoinits
+        path: cmd/
+      - linters:
+          - errcheck
+          - gosec
+          - unparam
+        path: _test\.go$
+    paths:
+      - vendor
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  exclude-rules:
-    # Exclude generated files from all linters
-    - path: _templ\.go$
-      linters:
-        - gocritic
-        - gochecknoinits
-        - revive
-        - goconst
-        - errcheck
-        - gosec
-        - unused
-        - unparam
-
-    # Exclude sqlc generated files
-    - path: \.sql\.go$
-      linters:
-        - gocritic
-        - revive
-        - goconst
-        - errcheck
-        - unparam
-
-    # Allow init functions in main package
-    - path: cmd/
-      linters:
-        - gochecknoinits
-
-    # Test files can have looser rules
-    - path: _test\.go$
-      linters:
-        - errcheck
-        - gosec
-        - unparam
-
-  exclude-dirs:
-    - vendor
-
   max-issues-per-linter: 0
   max-same-issues: 0
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - firecrest
+  exclusions:
+    generated: lax
+    paths:
+      - vendor
+      - third_party$
+      - builtin$
+      - examples$
