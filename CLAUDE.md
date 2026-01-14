@@ -64,6 +64,23 @@ Default credentials: `postgres:postgres`
 
 See `.env.example` for required environment variables.
 
+### Code Quality and Linting
+
+All code must adhere to the linting rules defined in `.golangci.yml`. The project uses `golangci-lint` with a comprehensive set of linters covering:
+
+- Error handling and correctness
+- Code simplification and best practices
+- Security vulnerabilities
+- Code formatting and style
+- Performance optimizations
+
+**Running linting locally:**
+```bash
+golangci-lint run ./...
+```
+
+**CI/CD:** Pull requests are automatically checked by GitHub Actions and will be blocked from merging if linting fails. Ensure your code passes all linting checks before pushing.
+
 ## Key Features
 
 - Multi-tenant organization support
