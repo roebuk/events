@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"firecrest-go/db"
+	"firecrest/db"
 )
 
 // Database defines the interface for database operations used by handlers.

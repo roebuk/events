@@ -12,7 +12,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"firecrest-go/db"
+	"firecrest/db"
 )
 
 // mockDB implements the Database interface for testing.

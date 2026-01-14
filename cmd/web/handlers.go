@@ -6,9 +6,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"firecrest-go/db"
-	"firecrest-go/ui/templates"
-	"firecrest-go/ui/templates/auth"
+	"firecrest/db"
+	"firecrest/ui/templates"
+	"firecrest/ui/templates/auth"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
