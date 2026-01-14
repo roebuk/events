@@ -42,6 +42,7 @@ func (app *application) serverError(w http.ResponseWriter, r *http.Request, err 
 	`))
 }
 
+//nolint:unparam // status parameter kept for future flexibility with different HTTP status codes
 func (app *application) render(ctx context.Context, w http.ResponseWriter, status int, component templ.Component) {
 	w.WriteHeader(status)
 
