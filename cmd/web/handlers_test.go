@@ -51,10 +51,10 @@ func (m *mockDB) CreateUser(ctx context.Context, arg db.CreateUserParams) (db.Us
 	return db.User{}, nil
 }
 
-func newTestApplication(db Database) *application {
+func newTestApplication(database Database) *application {
 	return &application{
 		logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
-		db:     db,
+		db:     database,
 	}
 }
 
@@ -71,7 +71,7 @@ func TestHome(t *testing.T) {
 
 		app := newTestApplication(mock)
 
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rr := httptest.NewRecorder()
 
 		app.home(rr, req)
@@ -90,7 +90,7 @@ func TestHome(t *testing.T) {
 
 		app := newTestApplication(mock)
 
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rr := httptest.NewRecorder()
 
 		app.home(rr, req)
@@ -109,7 +109,7 @@ func TestHome(t *testing.T) {
 
 		app := newTestApplication(mock)
 
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rr := httptest.NewRecorder()
 
 		app.home(rr, req)
@@ -137,7 +137,7 @@ func TestEventView(t *testing.T) {
 
 		app := newTestApplication(mock)
 
-		req := httptest.NewRequest(http.MethodGet, "/events/test-event", nil)
+		req := httptest.NewRequest(http.MethodGet, "/events/test-event", http.NoBody)
 		req.SetPathValue("slug", "test-event")
 		rr := httptest.NewRecorder()
 
@@ -157,7 +157,7 @@ func TestEventView(t *testing.T) {
 
 		app := newTestApplication(mock)
 
-		req := httptest.NewRequest(http.MethodGet, "/events/non-existent", nil)
+		req := httptest.NewRequest(http.MethodGet, "/events/non-existent", http.NoBody)
 		req.SetPathValue("slug", "non-existent")
 		rr := httptest.NewRecorder()
 
@@ -172,7 +172,7 @@ func TestEventView(t *testing.T) {
 		mock := &mockDB{}
 		app := newTestApplication(mock)
 
-		req := httptest.NewRequest(http.MethodGet, "/events/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/events/", http.NoBody)
 		req.SetPathValue("slug", "")
 		rr := httptest.NewRecorder()
 
@@ -188,8 +188,8 @@ func TestEventView(t *testing.T) {
 		app := newTestApplication(mock)
 		longSlug := strings.Repeat("a", 101)
 
-		req := httptest.NewRequest(http.MethodGet, "/events/"+string(longSlug), nil)
-		req.SetPathValue("slug", string(longSlug))
+		req := httptest.NewRequest(http.MethodGet, "/events/"+longSlug, http.NoBody)
+		req.SetPathValue("slug", longSlug)
 		rr := httptest.NewRecorder()
 
 		app.eventView(rr, req)
@@ -208,7 +208,7 @@ func TestEventView(t *testing.T) {
 
 		app := newTestApplication(mock)
 
-		req := httptest.NewRequest(http.MethodGet, "/events/test-event", nil)
+		req := httptest.NewRequest(http.MethodGet, "/events/test-event", http.NoBody)
 		req.SetPathValue("slug", "test-event")
 		rr := httptest.NewRecorder()
 
