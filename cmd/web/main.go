@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 
 	"firecrest/db"
 )
@@ -26,8 +27,26 @@ func main() {
 }
 
 func run() error {
+	// Load .env file in development
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("No .env file found, using system environment variables")
+	}
+
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))
-	dbpool, err := pgxpool.New(context.Background(), "postgres://postgres:postgres@127.0.0.1:5432/firecrest")
+
+	// Get database configuration from environment variables
+	dbHost := getEnv("DB_HOST", "localhost")
+	dbPort := getEnv("DB_PORT", "5432")
+	dbUser := getEnv("DB_USER", "postgres")
+	dbPassword := getEnv("DB_PASSWORD", "postgres")
+	dbName := getEnv("DB_NAME", "firecrest")
+	dbSSLMode := getEnv("DB_SSLMODE", "disable")
+
+	// Build connection string
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
+
+	dbpool, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -51,4 +70,13 @@ func run() error {
 
 	fmt.Println("Running server on :8080")
 	return srv.ListenAndServe()
+}
+
+// getEnv retrieves the value of an environment variable or returns a default value
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }
