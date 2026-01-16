@@ -12,11 +12,14 @@ import (
 	"github.com/joho/godotenv"
 
 	"firecrest/db"
+	"firecrest/internal/repository"
+	"firecrest/internal/service"
 )
 
 type application struct {
-	logger *slog.Logger
-	db     Database
+	logger       *slog.Logger
+	eventService service.EventService
+	userService  service.UserService
 }
 
 func main() {
@@ -54,9 +57,18 @@ func run() error {
 
 	queries := db.New(dbpool)
 
+	// Initialize repositories
+	eventRepo := repository.NewEventRepository(queries)
+	userRepo := repository.NewUserRepository(queries)
+
+	// Initialize services
+	eventService := service.NewEventService(eventRepo)
+	userService := service.NewUserService(userRepo)
+
 	app := &application{
-		logger: logger,
-		db:     queries,
+		logger:       logger,
+		eventService: eventService,
+		userService:  userService,
 	}
 
 	srv := &http.Server{
