@@ -4,9 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/jackc/pgx/v5"
-
-	"firecrest/db"
+	"firecrest/internal/repository"
+	"firecrest/internal/service"
 	"firecrest/ui/templates"
 	"firecrest/ui/templates/auth"
 )
@@ -14,11 +13,13 @@ import (
 func (app *application) health(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"ok"}`))
+	if _, err := w.Write([]byte(`{"status":"ok"}`)); err != nil {
+		app.logger.Error("failed to write health response", "error", err)
+	}
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	events, err := app.db.ListEvents(r.Context())
+	events, err := app.eventService.ListEvents(r.Context())
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -30,15 +31,14 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 
-	if slug == "" || len(slug) > 100 {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	event, err := app.db.GetEvent(r.Context(), slug)
+	event, err := app.eventService.GetEvent(r.Context(), slug)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, repository.ErrNotFound) {
 			app.notFound(w)
+			return
+		}
+		if errors.Is(err, service.ErrInvalidInput) {
+			app.clientError(w, http.StatusBadRequest)
 			return
 		}
 		app.serverError(w, r, err)
@@ -69,7 +69,7 @@ func (app *application) signUpPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) {
-	event, err := app.db.CreateEvent(r.Context(), db.CreateEventParams{
+	event, err := app.eventService.CreateEvent(r.Context(), service.CreateEventInput{
 		OrganisationID: 1,
 		Name:           "Lincoln 10k",
 		Slug:           "lincoln-10k",
@@ -82,21 +82,8 @@ func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) 
 	app.render(r.Context(), w, http.StatusOK, templates.Event(event))
 }
 
-// func (app *application) adminCreateOrg(w http.ResponseWriter, r *http.Request) {
-// 	org, err := app.db.CreateOrganisation(context.Background(), tutorial.cr{
-// 		Name: "Lincoln 10k",
-// 		Slug: "lincoln-10k",
-// 	})
-// 	if err != nil {
-// 		app.serverError(w, r, err)
-// 		return
-// 	}
-
-// 	app.render(w, http.StatusOK, templates.Event(event))
-// }
-
 func (app *application) adminCreateUser(w http.ResponseWriter, r *http.Request) {
-	_, err := app.db.CreateUser(r.Context(), db.CreateUserParams{
+	_, err := app.userService.CreateUser(r.Context(), service.CreateUserInput{
 		Email:     "user@example.com",
 		FirstName: "Kristian",
 		LastName:  "Roebuck",
@@ -108,5 +95,5 @@ func (app *application) adminCreateUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	app.render(r.Context(), w, http.StatusOK, templates.Home(make([]db.Event, 0)))
+	app.render(r.Context(), w, http.StatusOK, templates.Home(nil))
 }
