@@ -10,6 +10,12 @@ import (
 	"firecrest/ui/templates/auth"
 )
 
+func (app *application) health(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"ok"}`))
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	events, err := app.eventService.ListEvents(r.Context())
 	if err != nil {

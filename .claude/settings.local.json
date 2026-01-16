@@ -7,7 +7,14 @@
       "Bash(go run:*)",
       "Bash(golangci-lint run:*)",
       "Bash(gofmt:*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__find_symbol",
+      "mcp__serena__think_about_task_adherence",
+      "mcp__serena__onboarding",
+      "mcp__serena__list_dir",
+      "mcp__serena__write_memory"
     ]
   }
 }
