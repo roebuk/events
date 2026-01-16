@@ -13,7 +13,9 @@ import (
 func (app *application) health(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"ok"}`))
+	if _, err := w.Write([]byte(`{"status":"ok"}`)); err != nil {
+		app.logger.Error("failed to write health response", "error", err)
+	}
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
