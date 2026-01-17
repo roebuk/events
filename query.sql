@@ -91,3 +91,65 @@ RETURNING *;
 UPDATE users
 SET deleted_at = NOW()
 WHERE id = $1;
+
+
+-- Auth Credentials Queries
+
+-- name: CreateAuthCredentials :one
+INSERT INTO auth_credentials (
+    user_id,
+    password_hash
+) VALUES ($1, $2)
+RETURNING *;
+
+-- name: GetAuthCredentialsByUserID :one
+SELECT * FROM auth_credentials
+WHERE user_id = $1
+AND deleted_at IS NULL
+LIMIT 1;
+
+-- name: GetUserByEmail :one
+SELECT * FROM users
+WHERE email = $1
+AND deleted_at IS NULL
+LIMIT 1;
+
+-- name: GetAuthCredentialsByEmail :one
+SELECT ac.* FROM auth_credentials ac
+INNER JOIN users u ON ac.user_id = u.id
+WHERE u.email = $1
+AND ac.deleted_at IS NULL
+AND u.deleted_at IS NULL
+LIMIT 1;
+
+-- name: UpdateLastLogin :exec
+UPDATE auth_credentials
+SET last_login_at = NOW(),
+    failed_login_attempts = 0,
+    locked_until = NULL
+WHERE user_id = $1;
+
+-- name: IncrementFailedLoginAttempts :exec
+UPDATE auth_credentials
+SET failed_login_attempts = failed_login_attempts + 1
+WHERE user_id = $1;
+
+-- name: LockAccount :exec
+UPDATE auth_credentials
+SET locked_until = $2
+WHERE user_id = $1;
+
+-- name: IsAccountLocked :one
+SELECT
+    CASE
+        WHEN locked_until IS NULL THEN false
+        WHEN locked_until > NOW() THEN true
+        ELSE false
+    END as is_locked
+FROM auth_credentials
+WHERE user_id = $1;
+
+-- name: VerifyEmail :exec
+UPDATE auth_credentials
+SET email_verified_at = NOW()
+WHERE user_id = $1;

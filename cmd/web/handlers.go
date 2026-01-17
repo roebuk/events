@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/gorilla/csrf"
+
 	"firecrest/internal/repository"
 	"firecrest/internal/service"
 	"firecrest/ui/templates"
@@ -53,19 +55,113 @@ func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 =================
 */
 func (app *application) signInView(w http.ResponseWriter, r *http.Request) {
-	app.render(r.Context(), w, http.StatusOK, auth.SignIn())
+	flashes := app.getAllFlashes(r)
+	app.render(r.Context(), w, http.StatusOK, auth.SignIn(flashes, csrf.TemplateField(r)))
 }
 
 func (app *application) signInPost(w http.ResponseWriter, r *http.Request) {
-	app.render(r.Context(), w, http.StatusOK, auth.SignIn())
+	// Parse form
+	if err := r.ParseForm(); err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	email := r.PostForm.Get("email")
+	password := r.PostForm.Get("password")
+	rememberMe := r.PostForm.Get("remember_me") == "on"
+
+	// Authenticate user
+	result, err := app.authService.SignIn(r.Context(), service.SignInInput{
+		Email:      email,
+		Password:   password,
+		RememberMe: rememberMe,
+	})
+
+	if err != nil {
+		// Handle specific errors
+		switch {
+		case errors.Is(err, service.ErrInvalidCredentials):
+			app.addFlash(r, FlashError, "Invalid email or password")
+		case errors.Is(err, service.ErrEmailNotVerified):
+			app.addFlash(r, FlashWarning, "Please verify your email address before signing in")
+		case errors.Is(err, service.ErrAccountLocked):
+			app.addFlash(r, FlashError, "Your account has been locked due to too many failed login attempts. Please try again later.")
+		case errors.Is(err, service.ErrInvalidInput):
+			app.addFlash(r, FlashError, "Please provide both email and password")
+		default:
+			app.serverError(w, r, err)
+			return
+		}
+		http.Redirect(w, r, "/auth/sign-in", http.StatusSeeOther)
+		return
+	}
+
+	// Regenerate session token
+	if err := app.sessionManager.RenewToken(r.Context()); err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	// Store userID in session
+	app.sessionManager.Put(r.Context(), "userID", result.User.ID)
+
+	app.addFlash(r, FlashSuccess, "Welcome back!")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) signUpView(w http.ResponseWriter, r *http.Request) {
-	app.render(r.Context(), w, http.StatusOK, auth.SignUp())
+	flashes := app.getAllFlashes(r)
+	app.render(r.Context(), w, http.StatusOK, auth.SignUp(flashes, csrf.TemplateField(r)))
 }
 
 func (app *application) signUpPost(w http.ResponseWriter, r *http.Request) {
-	app.render(r.Context(), w, http.StatusOK, auth.SignUp())
+	// Parse form
+	if err := r.ParseForm(); err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	email := r.PostForm.Get("email")
+	password := r.PostForm.Get("password")
+	firstName := r.PostForm.Get("first_name")
+	lastName := r.PostForm.Get("last_name")
+
+	// Create user
+	_, err := app.authService.SignUp(r.Context(), service.SignUpInput{
+		Email:     email,
+		Password:  password,
+		FirstName: firstName,
+		LastName:  lastName,
+	})
+
+	if err != nil {
+		// Handle specific errors
+		switch {
+		case errors.Is(err, service.ErrEmailExists):
+			app.addFlash(r, FlashError, "An account with this email already exists")
+		case errors.Is(err, service.ErrInvalidInput):
+			app.addFlash(r, FlashError, err.Error())
+		default:
+			app.serverError(w, r, err)
+			return
+		}
+		http.Redirect(w, r, "/auth/sign-up", http.StatusSeeOther)
+		return
+	}
+
+	app.addFlash(r, FlashSuccess, "Account created successfully! Please check your email to verify your account.")
+	http.Redirect(w, r, "/auth/sign-in", http.StatusSeeOther)
+}
+
+func (app *application) signOut(w http.ResponseWriter, r *http.Request) {
+	// Destroy the session
+	if err := app.sessionManager.Destroy(r.Context()); err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	app.addFlash(r, FlashInfo, "You have been signed out")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) {

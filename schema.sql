@@ -160,6 +160,15 @@ CREATE TRIGGER update_social_accounts_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- Sessions table for SCS PostgreSQL store
+CREATE TABLE sessions (
+    token TEXT PRIMARY KEY,
+    data BYTEA NOT NULL,
+    expiry TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX sessions_expiry_idx ON sessions (expiry);
+
 
 
 

@@ -11,6 +11,39 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createAuthCredentials = `-- name: CreateAuthCredentials :one
+
+INSERT INTO auth_credentials (
+    user_id,
+    password_hash
+) VALUES ($1, $2)
+RETURNING id, user_id, password_hash, email_verified_at, last_login_at, failed_login_attempts, locked_until, created_at, updated_at, deleted_at
+`
+
+type CreateAuthCredentialsParams struct {
+	UserID       int64
+	PasswordHash string
+}
+
+// Auth Credentials Queries
+func (q *Queries) CreateAuthCredentials(ctx context.Context, arg CreateAuthCredentialsParams) (AuthCredential, error) {
+	row := q.db.QueryRow(ctx, createAuthCredentials, arg.UserID, arg.PasswordHash)
+	var i AuthCredential
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.PasswordHash,
+		&i.EmailVerifiedAt,
+		&i.LastLoginAt,
+		&i.FailedLoginAttempts,
+		&i.LockedUntil,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const createEvent = `-- name: CreateEvent :one
 INSERT INTO events (
   organisation_id,
@@ -160,6 +193,58 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	return err
 }
 
+const getAuthCredentialsByEmail = `-- name: GetAuthCredentialsByEmail :one
+SELECT ac.id, ac.user_id, ac.password_hash, ac.email_verified_at, ac.last_login_at, ac.failed_login_attempts, ac.locked_until, ac.created_at, ac.updated_at, ac.deleted_at FROM auth_credentials ac
+INNER JOIN users u ON ac.user_id = u.id
+WHERE u.email = $1
+AND ac.deleted_at IS NULL
+AND u.deleted_at IS NULL
+LIMIT 1
+`
+
+func (q *Queries) GetAuthCredentialsByEmail(ctx context.Context, email string) (AuthCredential, error) {
+	row := q.db.QueryRow(ctx, getAuthCredentialsByEmail, email)
+	var i AuthCredential
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.PasswordHash,
+		&i.EmailVerifiedAt,
+		&i.LastLoginAt,
+		&i.FailedLoginAttempts,
+		&i.LockedUntil,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getAuthCredentialsByUserID = `-- name: GetAuthCredentialsByUserID :one
+SELECT id, user_id, password_hash, email_verified_at, last_login_at, failed_login_attempts, locked_until, created_at, updated_at, deleted_at FROM auth_credentials
+WHERE user_id = $1
+AND deleted_at IS NULL
+LIMIT 1
+`
+
+func (q *Queries) GetAuthCredentialsByUserID(ctx context.Context, userID int64) (AuthCredential, error) {
+	row := q.db.QueryRow(ctx, getAuthCredentialsByUserID, userID)
+	var i AuthCredential
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.PasswordHash,
+		&i.EmailVerifiedAt,
+		&i.LastLoginAt,
+		&i.FailedLoginAttempts,
+		&i.LockedUntil,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const getEvent = `-- name: GetEvent :one
 SELECT id, organisation_id, name, slug, created_at, updated_at, deleted_at from events
 WHERE slug = $1 LIMIT 1
@@ -226,6 +311,65 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 	return i, err
 }
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, email, first_name, last_name, phone, address_line1, address_line2, city, state, postal_code, country, role, created_at, updated_at, deleted_at FROM users
+WHERE email = $1
+AND deleted_at IS NULL
+LIMIT 1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FirstName,
+		&i.LastName,
+		&i.Phone,
+		&i.AddressLine1,
+		&i.AddressLine2,
+		&i.City,
+		&i.State,
+		&i.PostalCode,
+		&i.Country,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const incrementFailedLoginAttempts = `-- name: IncrementFailedLoginAttempts :exec
+UPDATE auth_credentials
+SET failed_login_attempts = failed_login_attempts + 1
+WHERE user_id = $1
+`
+
+func (q *Queries) IncrementFailedLoginAttempts(ctx context.Context, userID int64) error {
+	_, err := q.db.Exec(ctx, incrementFailedLoginAttempts, userID)
+	return err
+}
+
+const isAccountLocked = `-- name: IsAccountLocked :one
+SELECT
+    CASE
+        WHEN locked_until IS NULL THEN false
+        WHEN locked_until > NOW() THEN true
+        ELSE false
+    END as is_locked
+FROM auth_credentials
+WHERE user_id = $1
+`
+
+func (q *Queries) IsAccountLocked(ctx context.Context, userID int64) (bool, error) {
+	row := q.db.QueryRow(ctx, isAccountLocked, userID)
+	var is_locked bool
+	err := row.Scan(&is_locked)
+	return is_locked, err
+}
+
 const listEvents = `-- name: ListEvents :many
 SELECT id, organisation_id, name, slug, created_at, updated_at, deleted_at from events
 ORDER BY name
@@ -259,6 +403,22 @@ func (q *Queries) ListEvents(ctx context.Context) ([]Event, error) {
 	return items, nil
 }
 
+const lockAccount = `-- name: LockAccount :exec
+UPDATE auth_credentials
+SET locked_until = $2
+WHERE user_id = $1
+`
+
+type LockAccountParams struct {
+	UserID      int64
+	LockedUntil pgtype.Timestamptz
+}
+
+func (q *Queries) LockAccount(ctx context.Context, arg LockAccountParams) error {
+	_, err := q.db.Exec(ctx, lockAccount, arg.UserID, arg.LockedUntil)
+	return err
+}
+
 const updateEvent = `-- name: UpdateEvent :exec
 UPDATE events
 SET name = $2,
@@ -275,6 +435,19 @@ type UpdateEventParams struct {
 
 func (q *Queries) UpdateEvent(ctx context.Context, arg UpdateEventParams) error {
 	_, err := q.db.Exec(ctx, updateEvent, arg.ID, arg.Name, arg.Slug)
+	return err
+}
+
+const updateLastLogin = `-- name: UpdateLastLogin :exec
+UPDATE auth_credentials
+SET last_login_at = NOW(),
+    failed_login_attempts = 0,
+    locked_until = NULL
+WHERE user_id = $1
+`
+
+func (q *Queries) UpdateLastLogin(ctx context.Context, userID int64) error {
+	_, err := q.db.Exec(ctx, updateLastLogin, userID)
 	return err
 }
 
@@ -342,5 +515,16 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.Country,
 		arg.Role,
 	)
+	return err
+}
+
+const verifyEmail = `-- name: VerifyEmail :exec
+UPDATE auth_credentials
+SET email_verified_at = NOW()
+WHERE user_id = $1
+`
+
+func (q *Queries) VerifyEmail(ctx context.Context, userID int64) error {
+	_, err := q.db.Exec(ctx, verifyEmail, userID)
 	return err
 }

@@ -11,7 +11,9 @@ import templruntime "github.com/a-h/templ/runtime"
 import "firecrest/ui/templates/components"
 import "firecrest/ui/templates"
 
-func SignIn() templ.Component {
+import "html/template"
+
+func SignIn(flashes map[string]string, csrfToken template.HTML) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -44,7 +46,15 @@ func SignIn() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Sign In</h1><form method=\"POST\" action=\"/auth/sign-in\">")
+			templ_7745c5c3_Err = components.Flash(flashes).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <h1>Sign In</h1><form method=\"POST\" action=\"/auth/sign-in\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.CSRFField(csrfToken).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -53,8 +63,8 @@ func SignIn() templ.Component {
 				Label: "Email",
 			}, templ.Attributes{
 				"autocomplete": "email",
-				"type":         "text",
-				"value":        "",
+				"type":         "email",
+				"required":     "true",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -65,18 +75,24 @@ func SignIn() templ.Component {
 			}, templ.Attributes{
 				"autocomplete": "current-password",
 				"type":         "password",
-				"value":        "",
+				"required":     "true",
 			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<label><input type=\"checkbox\" name=\"remember_me\" value=\"on\"> Remember me</label>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.Button(components.ButtonStruct{
 				Name: "Sign in",
-			}, nil).Render(ctx, templ_7745c5c3_Buffer)
+			}, templ.Attributes{
+				"type": "submit",
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</form><p>Don't have an account? <a href=\"/auth/sign-up\">Sign up</a></p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -90,7 +106,7 @@ func SignIn() templ.Component {
 	})
 }
 
-func SignUp() templ.Component {
+func SignUp(flashes map[string]string, csrfToken template.HTML) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -123,7 +139,35 @@ func SignUp() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<h1>Sign Up</h1><form method=\"POST\" action=\"/auth/sign-up\">")
+			templ_7745c5c3_Err = components.Flash(flashes).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " <h1>Sign Up</h1><form method=\"POST\" action=\"/auth/sign-up\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.CSRFField(csrfToken).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.TextField(components.TextFieldStruct{
+				Name:  "first_name",
+				Label: "First Name",
+			}, templ.Attributes{
+				"autocomplete": "given-name",
+				"required":     "true",
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.TextField(components.TextFieldStruct{
+				Name:  "last_name",
+				Label: "Last Name",
+			}, templ.Attributes{
+				"autocomplete": "family-name",
+				"required":     "true",
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -132,20 +176,22 @@ func SignUp() templ.Component {
 				Label: "Email",
 			}, templ.Attributes{
 				"autocomplete": "email",
+				"type":         "email",
+				"required":     "true",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.TextField(components.TextFieldStruct{
-				HasError: true,
 				Name:     "password",
 				Label:    "Password",
 				HelpText: "Your password must be at least 8 characters long.",
 			}, templ.Attributes{
-				"value":        "",
 				"placeholder":  "Create a password",
 				"type":         "password",
-				"autocomplete": "current-password",
+				"autocomplete": "new-password",
+				"required":     "true",
+				"minlength":    "8",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -153,13 +199,12 @@ func SignUp() templ.Component {
 			templ_7745c5c3_Err = components.Button(components.ButtonStruct{
 				Name: "Sign up",
 			}, templ.Attributes{
-				"type":         "submit",
-				"autocomplete": "current-password",
+				"type": "submit",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</form><p>Already have an account? <a href=\"/auth/sign-in\">Sign in</a></p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

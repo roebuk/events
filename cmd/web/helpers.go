@@ -58,3 +58,51 @@ func (app *application) clientError(w http.ResponseWriter, status int) {
 func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
 }
+
+// Flash message types
+const (
+	FlashSuccess = "success"
+	FlashError   = "error"
+	FlashInfo    = "info"
+	FlashWarning = "warning"
+)
+
+// addFlash adds a flash message to the session.
+func (app *application) addFlash(r *http.Request, messageType, message string) {
+	app.sessionManager.Put(r.Context(), "flash_"+messageType, message)
+}
+
+// getFlash retrieves and removes a flash message from the session.
+func (app *application) getFlash(r *http.Request, messageType string) string {
+	return app.sessionManager.PopString(r.Context(), "flash_"+messageType)
+}
+
+// getAllFlashes retrieves all flash messages and returns them in a map.
+func (app *application) getAllFlashes(r *http.Request) map[string]string {
+	flashes := make(map[string]string)
+
+	if msg := app.getFlash(r, FlashSuccess); msg != "" {
+		flashes[FlashSuccess] = msg
+	}
+	if msg := app.getFlash(r, FlashError); msg != "" {
+		flashes[FlashError] = msg
+	}
+	if msg := app.getFlash(r, FlashInfo); msg != "" {
+		flashes[FlashInfo] = msg
+	}
+	if msg := app.getFlash(r, FlashWarning); msg != "" {
+		flashes[FlashWarning] = msg
+	}
+
+	return flashes
+}
+
+// isAuthenticated returns true if the user is authenticated.
+func (app *application) isAuthenticated(r *http.Request) bool {
+	return app.sessionManager.Exists(r.Context(), "userID")
+}
+
+// getUserID retrieves the authenticated user's ID from the session.
+func (app *application) getUserID(r *http.Request) int64 {
+	return app.sessionManager.GetInt64(r.Context(), "userID")
+}
