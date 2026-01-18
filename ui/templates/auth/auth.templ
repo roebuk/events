@@ -3,14 +3,11 @@ package auth
 import "firecrest/ui/templates/components"
 import "firecrest/ui/templates"
 
-import "html/template"
-
-templ SignIn(flashes map[string]string, csrfToken template.HTML) {
+templ SignIn(flashes map[string]string) {
 	@templates.Html("Sign In", nil) {
 		@components.Flash(flashes)
 		<h1>Sign In</h1>
 		<form method="POST" action="/auth/sign-in">
-			@components.CSRFField(csrfToken)
 			@components.TextField(components.TextFieldStruct{
 				Name:  "email",
 				Label: "Email",
@@ -44,12 +41,11 @@ templ SignIn(flashes map[string]string, csrfToken template.HTML) {
 	}
 }
 
-templ SignUp(flashes map[string]string, csrfToken template.HTML) {
+templ SignUp(flashes map[string]string) {
 	@templates.Html("Sign Up", nil) {
 		@components.Flash(flashes)
 		<h1>Sign Up</h1>
 		<form method="POST" action="/auth/sign-up">
-			@components.CSRFField(csrfToken)
 			@components.TextField(components.TextFieldStruct{
 				Name:  "first_name",
 				Label: "First Name",

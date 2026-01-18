@@ -1,7 +1,5 @@
 package components
 
-import "html/template"
-
 templ Flash(flashes map[string]string) {
 	if len(flashes) > 0 {
 		<div class="flash-messages">
@@ -27,8 +25,4 @@ templ Flash(flashes map[string]string) {
 			}
 		</div>
 	}
-}
-
-templ CSRFField(csrfToken template.HTML) {
-	@templ.Raw(string(csrfToken))
 }

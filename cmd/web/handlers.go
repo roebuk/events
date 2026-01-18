@@ -4,8 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/gorilla/csrf"
-
 	"firecrest/internal/repository"
 	"firecrest/internal/service"
 	"firecrest/ui/templates"
@@ -56,7 +54,7 @@ func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 */
 func (app *application) signInView(w http.ResponseWriter, r *http.Request) {
 	flashes := app.getAllFlashes(r)
-	app.render(r.Context(), w, http.StatusOK, auth.SignIn(flashes, csrf.TemplateField(r)))
+	app.render(r.Context(), w, http.StatusOK, auth.SignIn(flashes))
 }
 
 func (app *application) signInPost(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +109,7 @@ func (app *application) signInPost(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) signUpView(w http.ResponseWriter, r *http.Request) {
 	flashes := app.getAllFlashes(r)
-	app.render(r.Context(), w, http.StatusOK, auth.SignUp(flashes, csrf.TemplateField(r)))
+	app.render(r.Context(), w, http.StatusOK, auth.SignUp(flashes))
 }
 
 func (app *application) signUpPost(w http.ResponseWriter, r *http.Request) {

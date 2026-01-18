@@ -11,9 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import "firecrest/ui/templates/components"
 import "firecrest/ui/templates"
 
-import "html/template"
-
-func SignIn(flashes map[string]string, csrfToken template.HTML) templ.Component {
+func SignIn(flashes map[string]string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -51,10 +49,6 @@ func SignIn(flashes map[string]string, csrfToken template.HTML) templ.Component 
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <h1>Sign In</h1><form method=\"POST\" action=\"/auth/sign-in\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = components.CSRFField(csrfToken).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -106,7 +100,7 @@ func SignIn(flashes map[string]string, csrfToken template.HTML) templ.Component 
 	})
 }
 
-func SignUp(flashes map[string]string, csrfToken template.HTML) templ.Component {
+func SignUp(flashes map[string]string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -144,10 +138,6 @@ func SignUp(flashes map[string]string, csrfToken template.HTML) templ.Component 
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " <h1>Sign Up</h1><form method=\"POST\" action=\"/auth/sign-up\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = components.CSRFField(csrfToken).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

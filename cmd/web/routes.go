@@ -2,9 +2,7 @@ package main
 
 import (
 	"net/http"
-	"os"
 
-	"github.com/gorilla/csrf"
 	"github.com/justinas/alice"
 )
 
@@ -16,14 +14,10 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 	mux.HandleFunc("GET /health", app.health)
 
-	// CSRF Protection Middleware
-	csrfKey := []byte(os.Getenv("CSRF_KEY"))
-	csrfMiddleware := csrf.Protect(
-		csrfKey,
-		csrf.Secure(false), // Set to true in production with HTTPS
-		csrf.Path("/"),
-		csrf.SameSite(csrf.SameSiteLaxMode),
-	)
+	// Protects against CSRF by checking Sec-Fetch-Site header
+	// https://www.alexedwards.net/blog/preventing-csrf-in-go
+	cop := http.NewCrossOriginProtection()
+	cop.AddTrustedOrigin("http://localhost:8080")
 
 	// Middleware chains
 	dynamic := alice.New(app.sessionManager.LoadAndSave, app.loadUser)
@@ -47,8 +41,8 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("GET /insert", app.adminCreatePost)
 	mux.HandleFunc("GET /insert-user", app.adminCreateUser)
 
-	// Apply standard middleware + CSRF
+	// Apply standard middleware + Cross-Origin Protection
 	standard := alice.New(app.logRequest, commonHeaders)
 
-	return standard.Then(csrfMiddleware(mux))
+	return standard.Then(cop.Handler(mux))
 }
