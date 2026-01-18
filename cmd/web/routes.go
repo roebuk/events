@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/gorilla/csrf"
 	"github.com/justinas/alice"
 )
 
@@ -14,7 +15,16 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 	mux.HandleFunc("GET /health", app.health)
 
-	dynamic := alice.New()
+	// CSRF Protection Middleware - using environment-specific config
+	csrfMiddleware := csrf.Protect(
+		[]byte(app.config.CSRF.Key),
+		csrf.FieldName("csrf"),
+		csrf.CookieName("csrf"),
+		csrf.Secure(app.config.CSRF.SecureCookie),
+		csrf.Path("/"),
+		csrf.SameSite(csrf.SameSiteLaxMode),
+		csrf.TrustedOrigins(app.config.CSRF.TrustedOrigins),
+	)
 
 	mux.Handle("/", dynamic.ThenFunc(app.home))
 	mux.Handle("GET /events/{slug}", dynamic.ThenFunc(app.eventView))

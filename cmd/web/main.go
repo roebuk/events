@@ -8,18 +8,24 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/pgxstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 
 	"firecrest/db"
+	"firecrest/internal/config"
 	"firecrest/internal/repository"
 	"firecrest/internal/service"
 )
 
 type application struct {
-	logger       *slog.Logger
-	eventService service.EventService
-	userService  service.UserService
+	config         *config.Config
+	logger         *slog.Logger
+	sessionManager *scs.SessionManager
+	eventService   service.EventService
+	userService    service.UserService
+	authService    service.AuthService
 }
 
 func main() {
@@ -30,24 +36,32 @@ func main() {
 }
 
 func run() error {
-	// Load .env file in development
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("No .env file found, using system environment variables")
+	// Load environment-specific .env file
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = "development"
+	}
+
+	// Try to load environment-specific .env file first, then fall back to .env
+	envFile := fmt.Sprintf(".env.%s", env)
+	if err := godotenv.Load(envFile); err != nil {
+		if err := godotenv.Load(); err != nil {
+			fmt.Println("No .env file found, using system environment variables")
+		}
 	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))
 
-	// Get database configuration from environment variables
-	dbHost := getEnv("DB_HOST", "localhost")
-	dbPort := getEnv("DB_PORT", "5432")
-	dbUser := getEnv("DB_USER", "postgres")
-	dbPassword := getEnv("DB_PASSWORD", "postgres")
-	dbName := getEnv("DB_NAME", "firecrest")
-	dbSSLMode := getEnv("DB_SSLMODE", "disable")
+	// Load configuration
+	cfg, err := config.Load()
+	if err != nil {
+		return fmt.Errorf("failed to load configuration: %w", err)
+	}
 
-	// Build connection string
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
-		dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
+	logger.Info("Starting application", "environment", cfg.Environment)
+
+	// Build connection string from config
+	dsn := cfg.DatabaseDSN()
 
 	dbpool, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
@@ -56,6 +70,15 @@ func run() error {
 	defer dbpool.Close()
 
 	queries := db.New(dbpool)
+
+	// Initialize session manager
+	sessionManager := scs.New()
+	sessionManager.Store = pgxstore.New(dbpool)
+	sessionManager.Lifetime = time.Duration(cfg.Session.LifetimeHrs) * time.Hour
+	sessionManager.Cookie.Name = cfg.Session.CookieName
+	sessionManager.Cookie.HttpOnly = true
+	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
+	sessionManager.Cookie.Secure = cfg.Session.SecureCookie
 
 	// Initialize repositories
 	eventRepo := repository.NewEventRepository(queries)
@@ -66,29 +89,23 @@ func run() error {
 	userService := service.NewUserService(userRepo)
 
 	app := &application{
-		logger:       logger,
-		eventService: eventService,
-		userService:  userService,
+		config:         cfg,
+		logger:         logger,
+		sessionManager: sessionManager,
+		eventService:   eventService,
+		userService:    userService,
+		authService:    authService,
 	}
 
 	srv := &http.Server{
-		Addr:           ":8080",
+		Addr:           ":" + cfg.Server.Port,
 		Handler:        app.routes(),
-		ReadTimeout:    5 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		IdleTimeout:    120 * time.Second,
+		ReadTimeout:    time.Duration(cfg.Server.ReadTimeout) * time.Second,
+		WriteTimeout:   time.Duration(cfg.Server.WriteTimeout) * time.Second,
+		IdleTimeout:    time.Duration(cfg.Server.IdleTimeout) * time.Second,
 		MaxHeaderBytes: 1 << 20, // 1 MB
 	}
 
-	fmt.Println("Running server on :8080")
+	logger.Info("Starting server", "port", cfg.Server.Port, "environment", cfg.Environment)
 	return srv.ListenAndServe()
-}
-
-// getEnv retrieves the value of an environment variable or returns a default value
-func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	return value
 }
