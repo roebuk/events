@@ -1,8 +1,6 @@
 module firecrest
 
-go 1.25.0
-
-toolchain go1.25.5
+go 1.25.6
 
 require (
 	github.com/a-h/templ v0.3.977
