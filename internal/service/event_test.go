@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"firecrest/db"
@@ -115,11 +116,7 @@ func TestEventService_GetEvent(t *testing.T) {
 	t.Run("returns ErrInvalidInput for slug exceeding 100 characters", func(t *testing.T) {
 		repo := &mockEventRepository{}
 		svc := NewEventService(repo)
-
-		longSlug := make([]byte, 101)
-		for i := range longSlug {
-			longSlug[i] = 'a'
-		}
+		longSlug := strings.Repeat("a", 101)
 
 		_, err := svc.GetEvent(context.Background(), string(longSlug))
 

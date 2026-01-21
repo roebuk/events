@@ -193,6 +193,12 @@ type Race struct {
 	DeletedAt             pgtype.Timestamptz
 }
 
+type Session struct {
+	Token  string
+	Data   []byte
+	Expiry pgtype.Timestamptz
+}
+
 type SocialAccount struct {
 	ID             int64
 	UserID         int64

@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/pgxstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 
@@ -17,9 +19,11 @@ import (
 )
 
 type application struct {
-	logger       *slog.Logger
-	eventService service.EventService
-	userService  service.UserService
+	logger         *slog.Logger
+	sessionManager *scs.SessionManager
+	eventService   service.EventService
+	userService    service.UserService
+	authService    service.AuthService
 }
 
 func main() {
@@ -57,18 +61,40 @@ func run() error {
 
 	queries := db.New(dbpool)
 
+	// Initialize session manager
+	sessionManager := scs.New()
+	sessionManager.Store = pgxstore.New(dbpool)
+	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.Name = "firecrest_session"
+	sessionManager.Cookie.HttpOnly = true
+	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
+	sessionManager.Cookie.Secure = false // Set to true in production with HTTPS
+
+	// Load CSRF key from environment (32 bytes for AES-256)
+	csrfKey := os.Getenv("CSRF_KEY")
+	if len(csrfKey) != 32 {
+		logger.Warn("CSRF_KEY not set or invalid length, using insecure default for development")
+		csrfKey = "dev-key-change-in-production!!" // Exactly 32 chars for dev
+	}
+	// Store CSRF key in environment for routes.go to access
+	os.Setenv("CSRF_KEY", csrfKey)
+
 	// Initialize repositories
 	eventRepo := repository.NewEventRepository(queries)
 	userRepo := repository.NewUserRepository(queries)
+	authRepo := repository.NewAuthRepository(queries)
 
 	// Initialize services
 	eventService := service.NewEventService(eventRepo)
 	userService := service.NewUserService(userRepo)
+	authService := service.NewAuthService(authRepo, userRepo)
 
 	app := &application{
-		logger:       logger,
-		eventService: eventService,
-		userService:  userService,
+		logger:         logger,
+		sessionManager: sessionManager,
+		eventService:   eventService,
+		userService:    userService,
+		authService:    authService,
 	}
 
 	srv := &http.Server{

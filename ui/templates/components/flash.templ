@@ -1,0 +1,28 @@
+package components
+
+templ Flash(flashes map[string]string) {
+	if len(flashes) > 0 {
+		<div class="flash-messages">
+			if msg, ok := flashes["success"]; ok {
+				<div class="flash flash--success" role="alert">
+					{ msg }
+				</div>
+			}
+			if msg, ok := flashes["error"]; ok {
+				<div class="flash flash--error" role="alert">
+					{ msg }
+				</div>
+			}
+			if msg, ok := flashes["info"]; ok {
+				<div class="flash flash--info" role="alert">
+					{ msg }
+				</div>
+			}
+			if msg, ok := flashes["warning"]; ok {
+				<div class="flash flash--warning" role="alert">
+					{ msg }
+				</div>
+			}
+		</div>
+	}
+}

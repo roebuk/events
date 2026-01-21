@@ -3,8 +3,9 @@ package auth
 import "firecrest/ui/templates/components"
 import "firecrest/ui/templates"
 
-templ SignIn() {
+templ SignIn(flashes map[string]string) {
 	@templates.Html("Sign In", nil) {
+		@components.Flash(flashes)
 		<h1>Sign In</h1>
 		<form method="POST" action="/auth/sign-in">
 			@components.TextField(components.TextFieldStruct{
@@ -12,8 +13,8 @@ templ SignIn() {
 				Label: "Email",
 			}, templ.Attributes{
 				"autocomplete": "email",
-				"type":         "text",
-				"value":        "",
+				"type":         "email",
+				"required":     "true",
 			})
 			@components.TextField(components.TextFieldStruct{
 				Name:  "password",
@@ -21,42 +22,72 @@ templ SignIn() {
 			}, templ.Attributes{
 				"autocomplete": "current-password",
 				"type":         "password",
-				"value":        "",
+				"required":     "true",
 			})
+			<label>
+				<input type="checkbox" name="remember_me" value="on"/>
+				Remember me
+			</label>
 			@components.Button(components.ButtonStruct{
 				Name: "Sign in",
-			}, nil)
+			}, templ.Attributes{
+				"type": "submit",
+			})
 		</form>
+		<p>
+			Don't have an account?
+			<a href="/auth/sign-up">Sign up</a>
+		</p>
 	}
 }
 
-templ SignUp() {
+templ SignUp(flashes map[string]string) {
 	@templates.Html("Sign Up", nil) {
+		@components.Flash(flashes)
 		<h1>Sign Up</h1>
 		<form method="POST" action="/auth/sign-up">
+			@components.TextField(components.TextFieldStruct{
+				Name:  "first_name",
+				Label: "First Name",
+			}, templ.Attributes{
+				"autocomplete": "given-name",
+				"required":     "true",
+			})
+			@components.TextField(components.TextFieldStruct{
+				Name:  "last_name",
+				Label: "Last Name",
+			}, templ.Attributes{
+				"autocomplete": "family-name",
+				"required":     "true",
+			})
 			@components.TextField(components.TextFieldStruct{
 				Name:  "email",
 				Label: "Email",
 			}, templ.Attributes{
 				"autocomplete": "email",
+				"type":         "email",
+				"required":     "true",
 			})
 			@components.TextField(components.TextFieldStruct{
-				HasError: true,
 				Name:     "password",
 				Label:    "Password",
 				HelpText: "Your password must be at least 8 characters long.",
 			}, templ.Attributes{
-				"value":        "",
 				"placeholder":  "Create a password",
 				"type":         "password",
-				"autocomplete": "current-password",
+				"autocomplete": "new-password",
+				"required":     "true",
+				"minlength":    "8",
 			})
 			@components.Button(components.ButtonStruct{
 				Name: "Sign up",
 			}, templ.Attributes{
-				"type":         "submit",
-				"autocomplete": "current-password",
+				"type": "submit",
 			})
 		</form>
+		<p>
+			Already have an account?
+			<a href="/auth/sign-in">Sign in</a>
+		</p>
 	}
 }
