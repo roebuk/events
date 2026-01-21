@@ -70,15 +70,6 @@ func run() error {
 	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
 	sessionManager.Cookie.Secure = false // Set to true in production with HTTPS
 
-	// Load CSRF key from environment (32 bytes for AES-256)
-	csrfKey := os.Getenv("CSRF_KEY")
-	if len(csrfKey) != 32 {
-		logger.Warn("CSRF_KEY not set or invalid length, using insecure default for development")
-		csrfKey = "dev-key-change-in-production!!" // Exactly 32 chars for dev
-	}
-	// Store CSRF key in environment for routes.go to access
-	os.Setenv("CSRF_KEY", csrfKey)
-
 	// Initialize repositories
 	eventRepo := repository.NewEventRepository(queries)
 	userRepo := repository.NewUserRepository(queries)
