@@ -116,6 +116,7 @@
     color: white;
     padding: 10px 0;
     text-align: center;
+    view-transition-name: header;
   }
 
   footer {
@@ -126,6 +127,7 @@
     position: fixed;
     width: 100%;
     bottom: 0;
+    view-transition-name: footer;
   }
 
   input {
