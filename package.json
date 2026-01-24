@@ -1,0 +1,14 @@
+{
+  "name": "events",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "css:build": "npx @tailwindcss/cli -i ui/static/input.css -o ui/static/main.css",
+    "css:watch": "npx @tailwindcss/cli -i ui/static/input.css -o ui/static/main.css --watch"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "4.1.18",
+    "tailwindcss": "4.1.18"
+  }
+}

@@ -1,9 +1,116 @@
 package components
 
-type ButtonStruct struct {
-	Name string
+// Button variants
+type ButtonVariant string
+
+const (
+	ButtonVariantDefault     ButtonVariant = "default"
+	ButtonVariantDestructive ButtonVariant = "destructive"
+	ButtonVariantOutline     ButtonVariant = "outline"
+	ButtonVariantSecondary   ButtonVariant = "secondary"
+	ButtonVariantGhost       ButtonVariant = "ghost"
+	ButtonVariantLink        ButtonVariant = "link"
+)
+
+// Button sizes
+type ButtonSize string
+
+const (
+	ButtonSizeDefault ButtonSize = "default"
+	ButtonSizeSm      ButtonSize = "sm"
+	ButtonSizeLg      ButtonSize = "lg"
+	ButtonSizeIcon    ButtonSize = "icon"
+)
+
+// ButtonProps defines the properties for the Button component
+type ButtonProps struct {
+	Variant   ButtonVariant
+	Size      ButtonSize
+	FullWidth bool
+	Disabled  bool
+	Type      string
+	Href      string
+	Class     string
 }
 
-templ Button(button ButtonStruct, attrs templ.Attributes) {
-	<button class="btn" { attrs... }>{ button.Name }</button>
+// buttonBaseClasses returns the base classes for all buttons
+func buttonBaseClasses() string {
+	return "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
+}
+
+// buttonVariantClasses returns classes based on variant
+func buttonVariantClasses(variant ButtonVariant) string {
+	switch variant {
+	case ButtonVariantDestructive:
+		return "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+	case ButtonVariantOutline:
+		return "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+	case ButtonVariantSecondary:
+		return "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+	case ButtonVariantGhost:
+		return "hover:bg-accent hover:text-accent-foreground"
+	case ButtonVariantLink:
+		return "text-primary underline-offset-4 hover:underline"
+	default:
+		return "bg-primary text-primary-foreground hover:bg-primary/90"
+	}
+}
+
+// buttonSizeClasses returns classes based on size
+func buttonSizeClasses(size ButtonSize) string {
+	switch size {
+	case ButtonSizeSm:
+		return "h-9 px-3"
+	case ButtonSizeLg:
+		return "h-11 px-8"
+	case ButtonSizeIcon:
+		return "h-10 w-10"
+	default:
+		return "h-10 px-4 py-2"
+	}
+}
+
+// buttonClasses combines all classes for a button
+func buttonClasses(props ButtonProps) string {
+	classes := buttonBaseClasses() + " " + buttonVariantClasses(props.Variant) + " " + buttonSizeClasses(props.Size)
+	if props.FullWidth {
+		classes += " w-full"
+	}
+	if props.Class != "" {
+		classes += " " + props.Class
+	}
+	return classes
+}
+
+// Button renders a button or link styled as a button
+templ Button(props ButtonProps, attrs templ.Attributes) {
+	if props.Href != "" {
+		<a
+			href={ templ.SafeURL(props.Href) }
+			class={ buttonClasses(props) }
+			if props.Disabled {
+				aria-disabled="true"
+				tabindex="-1"
+			}
+			{ attrs... }
+		>
+			{ children... }
+		</a>
+	} else {
+		<button
+			type={ buttonType(props.Type) }
+			class={ buttonClasses(props) }
+			disabled?={ props.Disabled }
+			{ attrs... }
+		>
+			{ children... }
+		</button>
+	}
+}
+
+func buttonType(t string) string {
+	if t == "" {
+		return "button"
+	}
+	return t
 }

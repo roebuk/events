@@ -28,11 +28,11 @@ templ SignIn(flashes map[string]string) {
 				<input type="checkbox" name="remember_me" value="on"/>
 				Remember me
 			</label>
-			@components.Button(components.ButtonStruct{
-				Name: "Sign in",
-			}, templ.Attributes{
-				"type": "submit",
-			})
+			@components.Button(components.ButtonProps{
+				Type: "submit",
+			}, nil) {
+				Sign in
+			}
 		</form>
 		<p>
 			Don't have an account?
@@ -79,11 +79,11 @@ templ SignUp(flashes map[string]string) {
 				"required":     "true",
 				"minlength":    "8",
 			})
-			@components.Button(components.ButtonStruct{
-				Name: "Sign up",
-			}, templ.Attributes{
-				"type": "submit",
-			})
+			@components.Button(components.ButtonProps{
+				Type: "submit",
+			}, nil) {
+				Sign up
+			}
 		</form>
 		<p>
 			Already have an account?
