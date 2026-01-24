@@ -30,6 +30,38 @@ const (
 	MinPasswordLength      = 8
 )
 
+// Clock provides time-related operations for testing.
+type Clock interface {
+	Now() time.Time
+}
+
+// RealClock implements Clock using the standard time package.
+type RealClock struct{}
+
+// Now returns the current time.
+func (RealClock) Now() time.Time {
+	return time.Now()
+}
+
+// PasswordHasher provides password hashing operations for testing.
+type PasswordHasher interface {
+	CompareHashAndPassword(hashedPassword, password []byte) error
+	GenerateFromPassword(password []byte, cost int) ([]byte, error)
+}
+
+// BcryptHasher implements PasswordHasher using bcrypt.
+type BcryptHasher struct{}
+
+// CompareHashAndPassword compares a bcrypt hashed password with its possible plaintext equivalent.
+func (BcryptHasher) CompareHashAndPassword(hashedPassword, password []byte) error {
+	return bcrypt.CompareHashAndPassword(hashedPassword, password)
+}
+
+// GenerateFromPassword generates a bcrypt hash of the password.
+func (BcryptHasher) GenerateFromPassword(password []byte, cost int) ([]byte, error) {
+	return bcrypt.GenerateFromPassword(password, cost)
+}
+
 // AuthService defines the interface for authentication business logic.
 type AuthService interface {
 	SignUp(ctx context.Context, input SignUpInput) (db.User, error)
@@ -103,6 +135,8 @@ type AuthResult struct {
 type authService struct {
 	authRepo repository.AuthRepository
 	userRepo repository.UserRepository
+	clock    Clock
+	hasher   PasswordHasher
 }
 
 // NewAuthService creates a new AuthService with the given repositories.
@@ -110,6 +144,8 @@ func NewAuthService(authRepo repository.AuthRepository, userRepo repository.User
 	return &authService{
 		authRepo: authRepo,
 		userRepo: userRepo,
+		clock:    RealClock{},
+		hasher:   BcryptHasher{},
 	}
 }
 
@@ -132,7 +168,7 @@ func (s *authService) SignUp(ctx context.Context, input SignUpInput) (db.User, e
 	}
 
 	// Hash password
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), BcryptCost)
+	passwordHash, err := s.hasher.GenerateFromPassword([]byte(input.Password), BcryptCost)
 	if err != nil {
 		return db.User{}, fmt.Errorf("failed to hash password: %w", err)
 	}
@@ -142,7 +178,7 @@ func (s *authService) SignUp(ctx context.Context, input SignUpInput) (db.User, e
 		Email:     email,
 		FirstName: strings.TrimSpace(input.FirstName),
 		LastName:  strings.TrimSpace(input.LastName),
-		Role:      db.UserRoleEntrant, // Default role
+		Role:      db.UserRoleEntrant,
 	})
 	if err != nil {
 		return db.User{}, fmt.Errorf("failed to create user: %w", err)
@@ -197,7 +233,7 @@ func (s *authService) SignIn(ctx context.Context, input SignInInput) (AuthResult
 	}
 
 	// Verify password
-	err = bcrypt.CompareHashAndPassword([]byte(creds.PasswordHash), []byte(input.Password))
+	err = s.hasher.CompareHashAndPassword([]byte(creds.PasswordHash), []byte(input.Password))
 	if err != nil {
 		// Increment failed attempts
 		if incrementErr := s.authRepo.IncrementFailedAttempts(ctx, user.ID); incrementErr != nil {
@@ -206,7 +242,7 @@ func (s *authService) SignIn(ctx context.Context, input SignInInput) (AuthResult
 
 		// Lock account if max attempts reached
 		if creds.FailedLoginAttempts+1 >= MaxLoginAttempts {
-			lockUntil := time.Now().Add(AccountLockoutDuration)
+			lockUntil := s.clock.Now().Add(AccountLockoutDuration)
 			if lockErr := s.authRepo.LockAccount(ctx, user.ID, lockUntil); lockErr != nil {
 				// Log error but continue
 			}
