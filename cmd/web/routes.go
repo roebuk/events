@@ -33,6 +33,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /auth/sign-in", guestOnly.ThenFunc(app.signInPost))
 	mux.Handle("GET /auth/sign-up", guestOnly.ThenFunc(app.signUpView))
 	mux.Handle("POST /auth/sign-up", guestOnly.ThenFunc(app.signUpPost))
+	mux.Handle("GET /auth/verify-email", dynamic.ThenFunc(app.verifyEmail))
 
 	// Sign out (authenticated only)
 	mux.Handle("POST /auth/sign-out", authRequired.ThenFunc(app.signOut))
