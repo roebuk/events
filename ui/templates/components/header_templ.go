@@ -29,7 +29,33 @@ func Header() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header><a href=\"/\">Header</a> <a href=\"/auth/sign-in\">Sign In</a> <a href=\"/auth/sign-up\">Sign Up</a></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60\"><div class=\"max-w-6xl mx-auto px-5 h-16 flex items-center justify-between\"><!-- Logo --><a href=\"/\" class=\"flex items-center gap-2 font-bold text-xl text-foreground hover:text-primary transition-colors\"><svg class=\"w-8 h-8 text-primary\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z\"></path></svg> <span>Firecrest</span></a><!-- Navigation --><nav class=\"hidden md:flex items-center gap-6\"><a href=\"/events\" class=\"text-sm font-medium text-muted-foreground hover:text-foreground transition-colors\">Events</a> <a href=\"/calendar\" class=\"text-sm font-medium text-muted-foreground hover:text-foreground transition-colors\">Calendar</a> <a href=\"/organizers\" class=\"text-sm font-medium text-muted-foreground hover:text-foreground transition-colors\">For Organizers</a></nav><!-- Auth Buttons --><div class=\"flex items-center gap-3\"><a href=\"/auth/sign-in\" class=\"text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-flex\">Sign In</a>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "Get Started")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = Button(ButtonProps{Href: "/auth/sign-up", Size: ButtonSizeSm}, nil).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- Mobile Menu Button --><button class=\"md:hidden p-2 text-muted-foreground hover:text-foreground\" aria-label=\"Toggle menu\"><svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h16M4 18h16\"></path></svg></button></div></div></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"firecrest/internal/repository"
 	"firecrest/internal/service"
 	"firecrest/ui/templates"
 	"firecrest/ui/templates/auth"
@@ -19,33 +18,22 @@ func (app *application) health(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	events, err := app.eventService.ListEvents(r.Context())
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
+	// Use mock data for UI development
+	events := templates.GetMockEvents()
 	app.render(r.Context(), w, http.StatusOK, templates.Home(events))
 }
 
 func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 
-	event, err := app.eventService.GetEvent(r.Context(), slug)
-	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
-			app.notFound(w)
-			return
-		}
-		if errors.Is(err, service.ErrInvalidInput) {
-			app.clientError(w, http.StatusBadRequest)
-			return
-		}
-		app.serverError(w, r, err)
+	// Use mock data for UI development
+	event := templates.GetMockEvent(slug)
+	if event == nil {
+		app.notFound(w)
 		return
 	}
 
-	app.render(r.Context(), w, http.StatusOK, templates.Event(event))
+	app.render(r.Context(), w, http.StatusOK, templates.Event(*event))
 }
 
 /*
@@ -163,7 +151,7 @@ func (app *application) signOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) {
-	event, err := app.eventService.CreateEvent(r.Context(), service.CreateEventInput{
+	_, err := app.eventService.CreateEvent(r.Context(), service.CreateEventInput{
 		OrganisationID: 1,
 		Name:           "Lincoln 10k",
 		Slug:           "lincoln-10k",
@@ -173,7 +161,8 @@ func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	app.render(r.Context(), w, http.StatusOK, templates.Event(event))
+	// Redirect to home page after creating event
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) adminCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -189,5 +178,6 @@ func (app *application) adminCreateUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	app.render(r.Context(), w, http.StatusOK, templates.Home(nil))
+	// Redirect to home page after creating user
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
