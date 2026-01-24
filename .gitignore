@@ -8,6 +8,7 @@ coverage.html
 
 # Dependency directories
 vendor/
+node_modules/
 
 .env
 
