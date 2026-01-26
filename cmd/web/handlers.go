@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"net/http"
+	"os"
 
 	"firecrest/internal/repository"
 	"firecrest/internal/service"
@@ -125,7 +126,7 @@ func (app *application) signUpPost(w http.ResponseWriter, r *http.Request) {
 	lastName := r.PostForm.Get("last_name")
 
 	// Create user
-	_, err := app.authService.SignUp(r.Context(), service.SignUpInput{
+	result, err := app.authService.SignUp(r.Context(), service.SignUpInput{
 		Email:     email,
 		Password:  password,
 		FirstName: firstName,
@@ -147,6 +148,14 @@ func (app *application) signUpPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Log verification URL in development mode for testing
+	if os.Getenv("DEBUG") == "true" {
+		app.logger.Info("email verification code generated",
+			"email", email,
+			"verification_url", "http://localhost:8080/auth/verify-email?code="+result.VerificationCode,
+		)
+	}
+
 	app.addFlash(r, FlashSuccess, "Account created successfully! Please check your email to verify your account.")
 	http.Redirect(w, r, "/auth/sign-in", http.StatusSeeOther)
 }
@@ -160,6 +169,31 @@ func (app *application) signOut(w http.ResponseWriter, r *http.Request) {
 
 	app.addFlash(r, FlashInfo, "You have been signed out")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) verifyEmail(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		app.addFlash(r, FlashError, "Invalid verification link")
+		http.Redirect(w, r, "/auth/sign-in", http.StatusSeeOther)
+		return
+	}
+
+	err := app.authService.VerifyEmailByToken(r.Context(), code)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrInvalidVerificationCode):
+			app.addFlash(r, FlashError, "Invalid or expired verification link. Please request a new one.")
+		default:
+			app.serverError(w, r, err)
+			return
+		}
+		http.Redirect(w, r, "/auth/sign-in", http.StatusSeeOther)
+		return
+	}
+
+	app.addFlash(r, FlashSuccess, "Your email has been verified! You can now sign in.")
+	http.Redirect(w, r, "/auth/sign-in", http.StatusSeeOther)
 }
 
 func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) {
