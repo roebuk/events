@@ -1,0 +1,51 @@
+package components
+
+// BadgeVariant defines the style of the badge
+type BadgeVariant string
+
+const (
+	BadgeVariantDefault     BadgeVariant = "default"
+	BadgeVariantSecondary   BadgeVariant = "secondary"
+	BadgeVariantOutline     BadgeVariant = "outline"
+	BadgeVariantDestructive BadgeVariant = "destructive"
+	BadgeVariantSuccess     BadgeVariant = "success"
+)
+
+// BadgeProps defines the properties for the Badge component
+type BadgeProps struct {
+	Variant BadgeVariant
+	Class   string
+}
+
+func badgeBaseClasses() string {
+	return "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors"
+}
+
+func badgeVariantClasses(variant BadgeVariant) string {
+	switch variant {
+	case BadgeVariantSecondary:
+		return "bg-secondary text-secondary-foreground"
+	case BadgeVariantOutline:
+		return "border border-input bg-transparent text-foreground"
+	case BadgeVariantDestructive:
+		return "bg-destructive text-destructive-foreground"
+	case BadgeVariantSuccess:
+		return "bg-primary/10 text-primary"
+	default:
+		return "bg-primary text-primary-foreground"
+	}
+}
+
+func badgeClasses(props BadgeProps) string {
+	classes := badgeBaseClasses() + " " + badgeVariantClasses(props.Variant)
+	if props.Class != "" {
+		classes += " " + props.Class
+	}
+	return classes
+}
+
+templ Badge(props BadgeProps) {
+	<span class={ badgeClasses(props) }>
+		{ children... }
+	</span>
+}

@@ -1,0 +1,90 @@
+package components
+
+import "firecrest/ui/viewmodels"
+
+templ EventCard(event viewmodels.EventViewModel) {
+	<a
+		href={ templ.URL("/events/" + event.Slug) }
+		class="group block bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+	>
+		<!-- Event Image -->
+		<div class="relative aspect-[3/2] overflow-hidden">
+			<img
+				src={ event.ImageURL }
+				alt={ event.Name }
+				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+			/>
+			<!-- Date Badge -->
+			<div class="absolute top-3 left-3 bg-background/95 backdrop-blur-sm rounded-lg px-3 py-2 text-center shadow-md">
+				<div class="text-2xl font-bold text-foreground leading-none">{ event.FormattedDay() }</div>
+				<div class="text-xs font-medium text-muted-foreground uppercase">{ event.FormattedMonth() }</div>
+			</div>
+			<!-- Race Type Badge -->
+			<div class="absolute top-3 right-3">
+				@Badge(BadgeProps{Variant: BadgeVariantDefault}) {
+					{ event.RaceType }
+				}
+			</div>
+		</div>
+		<!-- Event Details -->
+		<div class="p-4">
+			<h3 class="font-semibold text-lg text-card-foreground group-hover:text-primary transition-colors line-clamp-1">
+				{ event.Name }
+			</h3>
+			<div class="mt-2 space-y-2">
+				<!-- Location -->
+				<div class="flex items-center gap-2 text-sm text-muted-foreground">
+					<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+					</svg>
+					<span class="truncate">{ event.Location }</span>
+				</div>
+				<!-- Distance -->
+				<div class="flex items-center gap-2 text-sm text-muted-foreground">
+					<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+					</svg>
+					<span>{ event.Distance }</span>
+				</div>
+			</div>
+			<!-- Footer -->
+			<div class="mt-4 pt-4 border-t border-border flex items-center justify-between">
+				<span class="text-lg font-semibold text-foreground">{ event.Price }</span>
+				<div class="flex items-center gap-1 text-sm text-muted-foreground">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+					</svg>
+					<span>{ itoa(event.SpotsRemaining()) } spots left</span>
+				</div>
+			</div>
+		</div>
+	</a>
+}
+
+func itoa(n int) string {
+	if n == 0 {
+		return "0"
+	}
+
+	negative := n < 0
+	if negative {
+		n = -n
+	}
+
+	digits := make([]byte, 0, 10)
+	for n > 0 {
+		digits = append(digits, byte('0'+n%10))
+		n /= 10
+	}
+
+	// Reverse
+	for i, j := 0, len(digits)-1; i < j; i, j = i+1, j-1 {
+		digits[i], digits[j] = digits[j], digits[i]
+	}
+
+	if negative {
+		return "-" + string(digits)
+	}
+	return string(digits)
+}

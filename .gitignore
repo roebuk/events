@@ -32,3 +32,5 @@ go.work
 logs/
 
 tmpclaude*
+
+postgres_data/
