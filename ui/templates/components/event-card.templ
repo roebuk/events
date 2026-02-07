@@ -1,8 +1,8 @@
 package components
 
-import "firecrest/ui/templates"
+import "firecrest/ui/viewmodels"
 
-templ EventCard(event templates.EventViewModel) {
+templ EventCard(event viewmodels.EventViewModel) {
 	<a
 		href={ templ.URL("/events/" + event.Slug) }
 		class="group block bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
@@ -26,13 +26,11 @@ templ EventCard(event templates.EventViewModel) {
 				}
 			</div>
 		</div>
-
 		<!-- Event Details -->
 		<div class="p-4">
 			<h3 class="font-semibold text-lg text-card-foreground group-hover:text-primary transition-colors line-clamp-1">
 				{ event.Name }
 			</h3>
-
 			<div class="mt-2 space-y-2">
 				<!-- Location -->
 				<div class="flex items-center gap-2 text-sm text-muted-foreground">
@@ -42,7 +40,6 @@ templ EventCard(event templates.EventViewModel) {
 					</svg>
 					<span class="truncate">{ event.Location }</span>
 				</div>
-
 				<!-- Distance -->
 				<div class="flex items-center gap-2 text-sm text-muted-foreground">
 					<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +48,6 @@ templ EventCard(event templates.EventViewModel) {
 					<span>{ event.Distance }</span>
 				</div>
 			</div>
-
 			<!-- Footer -->
 			<div class="mt-4 pt-4 border-t border-border flex items-center justify-between">
 				<span class="text-lg font-semibold text-foreground">{ event.Price }</span>

@@ -7,6 +7,7 @@ import (
 	"firecrest/internal/service"
 	"firecrest/ui/templates"
 	"firecrest/ui/templates/auth"
+	"firecrest/ui/viewmodels"
 )
 
 func (app *application) health(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +20,7 @@ func (app *application) health(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Use mock data for UI development
-	events := templates.GetMockEvents()
+	events := viewmodels.GetMockEvents()
 	app.render(r.Context(), w, http.StatusOK, templates.Home(events))
 }
 
@@ -27,7 +28,7 @@ func (app *application) eventView(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 
 	// Use mock data for UI development
-	event := templates.GetMockEvent(slug)
+	event := viewmodels.GetMockEvent(slug)
 	if event == nil {
 		app.notFound(w)
 		return

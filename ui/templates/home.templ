@@ -1,21 +1,23 @@
 package templates
 
-import "firecrest/ui/templates/components"
+import (
+	"firecrest/ui/templates/components"
+	"firecrest/ui/viewmodels"
+)
 
-templ Home(events []EventViewModel) {
+templ Home(events []viewmodels.EventViewModel) {
 	@Html("Firecrest - Find Your Next Race", nil) {
 		<!-- Hero Section -->
 		<section class="relative -mx-5 -mt-5 mb-12 bg-gradient-to-br from-primary/10 via-background to-secondary/20 py-16 px-5">
 			<div class="max-w-3xl mx-auto text-center">
 				<h1 class="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
 					Find Your Next
-					<span class="text-primary"> Adventure</span>
+					<span class="text-primary">Adventure</span>
 				</h1>
 				<p class="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
 					Discover trail runs, ultra marathons, and road races across the UK.
 					From rolling hills to mountain peaks, your next challenge awaits.
 				</p>
-
 				<!-- Search Bar -->
 				<div class="mt-8 flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
 					<div class="flex-1 relative">
@@ -32,7 +34,6 @@ templ Home(events []EventViewModel) {
 						Search Events
 					}
 				</div>
-
 				<!-- Quick Filters -->
 				<div class="mt-6 flex flex-wrap justify-center gap-2">
 					@components.Badge(components.BadgeProps{Variant: components.BadgeVariantOutline, Class: "cursor-pointer hover:bg-accent"}) {
@@ -59,7 +60,6 @@ templ Home(events []EventViewModel) {
 				</div>
 			</div>
 		</section>
-
 		<!-- Events Grid -->
 		<section>
 			<div class="flex items-center justify-between mb-6">
@@ -68,14 +68,12 @@ templ Home(events []EventViewModel) {
 					View all events →
 				</a>
 			</div>
-
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 				for _, event := range events {
 					@components.EventCard(event)
 				}
 			</div>
 		</section>
-
 		<!-- CTA Section -->
 		<section class="mt-16 bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-8 md:p-12 text-center text-primary-foreground">
 			<h2 class="text-2xl md:text-3xl font-bold">Organising an Event?</h2>
@@ -91,8 +89,8 @@ templ Home(events []EventViewModel) {
 	}
 }
 
-templ Event(event EventViewModel) {
-	@Html(event.Name + " - Firecrest", nil) {
+templ Event(event viewmodels.EventViewModel) {
+	@Html(event.Name+" - Firecrest", nil) {
 		<!-- Hero Section with Main Image -->
 		<section class="relative -mx-5 -mt-5 mb-8">
 			<div class="relative h-72 md:h-96 overflow-hidden">
@@ -103,7 +101,6 @@ templ Event(event EventViewModel) {
 				/>
 				<div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
 			</div>
-
 			<!-- Event Header -->
 			<div class="relative -mt-24 px-5 max-w-5xl mx-auto">
 				<div class="bg-card rounded-xl border border-border shadow-lg p-6 md:p-8">
@@ -142,7 +139,6 @@ templ Event(event EventViewModel) {
 								</div>
 							</div>
 						</div>
-
 						<!-- Price & CTA -->
 						<div class="md:text-right">
 							<div class="text-sm text-muted-foreground">Starting from</div>
@@ -163,7 +159,6 @@ templ Event(event EventViewModel) {
 				</div>
 			</div>
 		</section>
-
 		<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 			<!-- Main Content -->
 			<div class="lg:col-span-2 space-y-8">
@@ -174,7 +169,6 @@ templ Event(event EventViewModel) {
 						{ event.Description }
 					</p>
 				</section>
-
 				<!-- Races Section -->
 				<section class="bg-card rounded-xl border border-border p-6">
 					<h2 class="text-xl font-semibold text-card-foreground mb-4">Available Races</h2>
@@ -184,7 +178,6 @@ templ Event(event EventViewModel) {
 						}
 					</div>
 				</section>
-
 				<!-- Photos Section -->
 				if len(event.Photos) > 0 {
 					<section class="bg-card rounded-xl border border-border p-6">
@@ -203,13 +196,11 @@ templ Event(event EventViewModel) {
 					</section>
 				}
 			</div>
-
 			<!-- Sidebar -->
 			<div class="space-y-6">
 				<!-- Quick Info Card -->
 				<div class="bg-card rounded-xl border border-border p-6 sticky top-6">
 					<h3 class="font-semibold text-card-foreground mb-4">Event Details</h3>
-
 					<div class="space-y-4">
 						<div class="flex items-start gap-3">
 							<div class="p-2 bg-primary/10 rounded-lg">
@@ -222,7 +213,6 @@ templ Event(event EventViewModel) {
 								<div class="font-medium text-card-foreground">{ event.FormattedDate() }</div>
 							</div>
 						</div>
-
 						<div class="flex items-start gap-3">
 							<div class="p-2 bg-primary/10 rounded-lg">
 								<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,7 +225,6 @@ templ Event(event EventViewModel) {
 								<div class="font-medium text-card-foreground">{ event.Location }</div>
 							</div>
 						</div>
-
 						<div class="flex items-start gap-3">
 							<div class="p-2 bg-primary/10 rounded-lg">
 								<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,7 +236,6 @@ templ Event(event EventViewModel) {
 								<div class="font-medium text-card-foreground">{ event.Distance }</div>
 							</div>
 						</div>
-
 						<div class="flex items-start gap-3">
 							<div class="p-2 bg-primary/10 rounded-lg">
 								<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,7 +248,6 @@ templ Event(event EventViewModel) {
 							</div>
 						</div>
 					</div>
-
 					<!-- Progress Bar -->
 					<div class="mt-6">
 						<div class="flex justify-between text-sm mb-2">
@@ -274,7 +261,6 @@ templ Event(event EventViewModel) {
 							></div>
 						</div>
 					</div>
-
 					<!-- CTA -->
 					<div class="mt-6">
 						@components.Button(components.ButtonProps{FullWidth: true, Size: components.ButtonSizeLg}, nil) {
@@ -282,7 +268,6 @@ templ Event(event EventViewModel) {
 						}
 					</div>
 				</div>
-
 				<!-- Location Map Placeholder -->
 				<div class="bg-card rounded-xl border border-border overflow-hidden">
 					<img
@@ -311,7 +296,7 @@ templ Event(event EventViewModel) {
 	}
 }
 
-templ RaceCard(race RaceViewModel) {
+templ RaceCard(race viewmodels.RaceViewModel) {
 	<div class="p-4 border border-border rounded-lg hover:border-primary/50 transition-colors">
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 			<div class="flex-1">

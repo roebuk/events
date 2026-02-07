@@ -61,12 +61,15 @@ CREATE TABLE events (
   organisation_id BIGINT NOT NULL REFERENCES organisations(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
+  year INT NOT NULL CHECK (year >= 2025)
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ
+
+  CONSTRAINT unique_year_slug UNIQUE(year, slug)
 );
 
-CREATE INDEX idx_events_slug ON events(slug);
+CREATE INDEX idx_events_year_slug ON events(year, slug);
 CREATE INDEX idx_events_deleted_at ON events(deleted_at) WHERE deleted_at IS NULL;
 
 CREATE TRIGGER update_events_updated_at
