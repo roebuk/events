@@ -3,15 +3,17 @@ package main
 import (
 	"net/http"
 
+	"firecrest/ui"
+
 	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	fileServer := http.FileServer(http.FS(ui.Files))
 
-	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("GET /static/", fileServer)
 	mux.HandleFunc("GET /health", app.health)
 
 	// Protects against CSRF by checking Sec-Fetch-Site header
