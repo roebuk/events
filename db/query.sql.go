@@ -48,25 +48,33 @@ const createEvent = `-- name: CreateEvent :one
 INSERT INTO events (
   organisation_id,
   name,
-  slug)
-VALUES ($1, $2, $3)
-RETURNING id, organisation_id, name, slug, created_at, updated_at, deleted_at
+  slug,
+  year)
+VALUES ($1, $2, $3, $4)
+RETURNING id, organisation_id, name, slug, year, created_at, updated_at, deleted_at
 `
 
 type CreateEventParams struct {
 	OrganisationID int64
 	Name           string
 	Slug           string
+	Year           int32
 }
 
 func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
-	row := q.db.QueryRow(ctx, createEvent, arg.OrganisationID, arg.Name, arg.Slug)
+	row := q.db.QueryRow(ctx, createEvent,
+		arg.OrganisationID,
+		arg.Name,
+		arg.Slug,
+		arg.Year,
+	)
 	var i Event
 	err := row.Scan(
 		&i.ID,
 		&i.OrganisationID,
 		&i.Name,
 		&i.Slug,
+		&i.Year,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -87,6 +95,60 @@ func (q *Queries) CreateOrganisation(ctx context.Context, name string) (Organisa
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const createRace = `-- name: CreateRace :one
+INSERT INTO races (
+  event_id,
+  name,
+  slug,
+  registration_open_date,
+  registration_close_date,
+  max_capacity,
+  price_units,
+  currency)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, event_id, name, slug, registration_open_date, registration_close_date, max_capacity, price_units, currency, created_at, updated_at, deleted_at
+`
+
+type CreateRaceParams struct {
+	EventID               int64
+	Name                  string
+	Slug                  string
+	RegistrationOpenDate  pgtype.Timestamptz
+	RegistrationCloseDate pgtype.Timestamptz
+	MaxCapacity           int32
+	PriceUnits            pgtype.Int4
+	Currency              pgtype.Text
+}
+
+func (q *Queries) CreateRace(ctx context.Context, arg CreateRaceParams) (Race, error) {
+	row := q.db.QueryRow(ctx, createRace,
+		arg.EventID,
+		arg.Name,
+		arg.Slug,
+		arg.RegistrationOpenDate,
+		arg.RegistrationCloseDate,
+		arg.MaxCapacity,
+		arg.PriceUnits,
+		arg.Currency,
+	)
+	var i Race
+	err := row.Scan(
+		&i.ID,
+		&i.EventID,
+		&i.Name,
+		&i.Slug,
+		&i.RegistrationOpenDate,
+		&i.RegistrationCloseDate,
+		&i.MaxCapacity,
+		&i.PriceUnits,
+		&i.Currency,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -246,7 +308,7 @@ func (q *Queries) GetAuthCredentialsByUserID(ctx context.Context, userID int64) 
 }
 
 const getEvent = `-- name: GetEvent :one
-SELECT id, organisation_id, name, slug, created_at, updated_at, deleted_at from events
+SELECT id, organisation_id, name, slug, year, created_at, updated_at, deleted_at from events
 WHERE slug = $1 LIMIT 1
 `
 
@@ -258,6 +320,7 @@ func (q *Queries) GetEvent(ctx context.Context, slug string) (Event, error) {
 		&i.OrganisationID,
 		&i.Name,
 		&i.Slug,
+		&i.Year,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -371,7 +434,7 @@ func (q *Queries) IsAccountLocked(ctx context.Context, userID int64) (bool, erro
 }
 
 const listEvents = `-- name: ListEvents :many
-SELECT id, organisation_id, name, slug, created_at, updated_at, deleted_at from events
+SELECT id, organisation_id, name, slug, year, created_at, updated_at, deleted_at from events
 ORDER BY name
 `
 
@@ -389,6 +452,47 @@ func (q *Queries) ListEvents(ctx context.Context) ([]Event, error) {
 			&i.OrganisationID,
 			&i.Name,
 			&i.Slug,
+			&i.Year,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listRacesByEvent = `-- name: ListRacesByEvent :many
+SELECT id, event_id, name, slug, registration_open_date, registration_close_date, max_capacity, price_units, currency, created_at, updated_at, deleted_at FROM races
+WHERE event_id = $1
+AND deleted_at IS NULL
+ORDER BY name
+`
+
+func (q *Queries) ListRacesByEvent(ctx context.Context, eventID int64) ([]Race, error) {
+	rows, err := q.db.Query(ctx, listRacesByEvent, eventID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Race
+	for rows.Next() {
+		var i Race
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.Name,
+			&i.Slug,
+			&i.RegistrationOpenDate,
+			&i.RegistrationCloseDate,
+			&i.MaxCapacity,
+			&i.PriceUnits,
+			&i.Currency,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -424,7 +528,7 @@ UPDATE events
 SET name = $2,
     slug = $3
 WHERE id = $1
-RETURNING id, organisation_id, name, slug, created_at, updated_at, deleted_at
+RETURNING id, organisation_id, name, slug, year, created_at, updated_at, deleted_at
 `
 
 type UpdateEventParams struct {

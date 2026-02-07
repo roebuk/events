@@ -24,6 +24,7 @@ type CreateEventInput struct {
 	OrganisationID int64
 	Name           string
 	Slug           string
+	Year           int32
 }
 
 // Validate checks if the input is valid.
@@ -39,6 +40,9 @@ func (i CreateEventInput) Validate() error {
 	}
 	if i.OrganisationID <= 0 {
 		return fmt.Errorf("%w: organisation_id must be positive", ErrInvalidInput)
+	}
+	if i.Year < 2025 {
+		return fmt.Errorf("%w: year must be 2025 or later", ErrInvalidInput)
 	}
 	return nil
 }
@@ -72,5 +76,6 @@ func (s *eventService) CreateEvent(ctx context.Context, input CreateEventInput) 
 		OrganisationID: input.OrganisationID,
 		Name:           input.Name,
 		Slug:           input.Slug,
+		Year:           input.Year,
 	})
 }

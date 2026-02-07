@@ -61,10 +61,10 @@ CREATE TABLE events (
   organisation_id BIGINT NOT NULL REFERENCES organisations(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
-  year INT NOT NULL CHECK (year >= 2025)
+  year INT NOT NULL CHECK (year >= 2025),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
 
   CONSTRAINT unique_year_slug UNIQUE(year, slug)
 );
