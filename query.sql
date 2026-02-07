@@ -11,8 +11,9 @@ ORDER BY name;
 INSERT INTO events (
   organisation_id,
   name,
-  slug)
-VALUES ($1, $2, $3)
+  slug,
+  year)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: UpdateEvent :exec
@@ -153,3 +154,23 @@ WHERE user_id = $1;
 UPDATE auth_credentials
 SET email_verified_at = NOW()
 WHERE user_id = $1;
+
+
+-- name: CreateRace :one
+INSERT INTO races (
+  event_id,
+  name,
+  slug,
+  registration_open_date,
+  registration_close_date,
+  max_capacity,
+  price_units,
+  currency)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING *;
+
+-- name: ListRacesByEvent :many
+SELECT * FROM races
+WHERE event_id = $1
+AND deleted_at IS NULL
+ORDER BY name;

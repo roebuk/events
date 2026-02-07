@@ -156,6 +156,7 @@ func (app *application) adminCreatePost(w http.ResponseWriter, r *http.Request) 
 		OrganisationID: 1,
 		Name:           "Lincoln 10k",
 		Slug:           "lincoln-10k",
+		Year:           2026,
 	})
 	if err != nil {
 		app.serverError(w, r, err)

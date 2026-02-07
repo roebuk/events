@@ -34,3 +34,6 @@ logs/
 tmpclaude*
 
 postgres_data/
+
+# Compiled binaries
+seed

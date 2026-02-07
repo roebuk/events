@@ -156,6 +156,7 @@ func TestEventService_CreateEvent(t *testing.T) {
 			OrganisationID: 1,
 			Name:           "New Event",
 			Slug:           "new-event",
+			Year:           2026,
 		})
 
 		if err != nil {
@@ -174,6 +175,7 @@ func TestEventService_CreateEvent(t *testing.T) {
 			OrganisationID: 1,
 			Name:           "",
 			Slug:           "new-event",
+			Year:           2026,
 		})
 
 		if !errors.Is(err, ErrInvalidInput) {
@@ -189,6 +191,7 @@ func TestEventService_CreateEvent(t *testing.T) {
 			OrganisationID: 1,
 			Name:           "New Event",
 			Slug:           "",
+			Year:           2026,
 		})
 
 		if !errors.Is(err, ErrInvalidInput) {
@@ -204,6 +207,7 @@ func TestEventService_CreateEvent(t *testing.T) {
 			OrganisationID: 0,
 			Name:           "New Event",
 			Slug:           "new-event",
+			Year:           2026,
 		})
 
 		if !errors.Is(err, ErrInvalidInput) {
@@ -223,6 +227,7 @@ func TestEventService_CreateEvent(t *testing.T) {
 			OrganisationID: 1,
 			Name:           "New Event",
 			Slug:           "new-event",
+			Year:           2026,
 		})
 
 		if err == nil {

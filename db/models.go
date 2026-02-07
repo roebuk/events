@@ -157,6 +157,7 @@ type Event struct {
 	OrganisationID int64
 	Name           string
 	Slug           string
+	Year           int32
 	CreatedAt      pgtype.Timestamptz
 	UpdatedAt      pgtype.Timestamptz
 	DeletedAt      pgtype.Timestamptz
